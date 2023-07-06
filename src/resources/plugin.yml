@@ -1,0 +1,5 @@
+name: AktiveSign
+main: de.sbg.unity.aktivesign.AktiveSign
+version: 2.0.0
+author: Sandboxgamer
+description: "Run Commands on signs"

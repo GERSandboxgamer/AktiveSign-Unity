@@ -1,0 +1,5 @@
+name: AktiveSignTrade
+main: de.sbg.unity.aktivesigntrade.AktiveSignTrade
+version: 2.0.0
+author: Sandboxgamer
+description: "DLC: Add shops to AktiveSign"
