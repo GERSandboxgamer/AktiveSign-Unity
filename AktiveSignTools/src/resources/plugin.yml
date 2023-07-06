@@ -1,0 +1,5 @@
+name: AktiveSignTools
+main: de.sbg.unity.aktivesigntools.AktiveSignTools
+version: 1.0.0
+author: Sandboxgamer
+description: "DLC: Add some tools to AktiveSign"
