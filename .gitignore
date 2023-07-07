@@ -7,3 +7,9 @@
 /build/
 /dist/
 /nbproject/private/
+/DLC/AktiveSignHome/nbproject/private/
+/DLC/AktiveSignTools/build/
+/DLC/AktiveSignTools/dist/
+/DLC/AktiveSignTools/nbproject/private/
+/DLC/AktiveSignTrade/nbproject/private/
+/DLC/AktiveSignTrain/nbproject/private/
