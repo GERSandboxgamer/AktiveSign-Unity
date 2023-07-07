@@ -46,6 +46,24 @@ public class SignTester {
         }
         return SignTesterStatus.Misspelled;
     }
+    
+    public SignTesterStatus TestSignBySignText(Player player, String SignText) {
+        String[] line = Utils.StringUtils.getLines(SignText);
+
+        if (line.length == 1) {
+            return TestSign(player, line[0]);
+        }
+        if (line.length == 2) {
+            return TestSign(player, line[0], line[1]);
+        }
+        if (line.length == 3) {
+            return TestSign(player, line[0], line[1], line[2]);
+        }
+        if (line.length == 4) {
+            return TestSign(player, line[0], line[1], line[2], line[3]);
+        }
+        return SignTesterStatus.Misspelled;
+    }
 
     public SignTesterStatus TestSign(Player player, Sign sign, boolean interact) {
         String[] line = Utils.StringUtils.getLines(sign.getText());
@@ -171,7 +189,8 @@ public class SignTester {
         Error("Es ist ein Fehler aufgetreten!"),
         EventCancel("Event wurde abgebrochen!"),
         EditMode("Der EditMode ist aktiv"),
-        Nothing("Kein Ergebniss!");
+        Nothing("Kein Ergebniss!"),
+        Waiting("Waiting for something");
 
         private final String msg;
 
@@ -185,17 +204,17 @@ public class SignTester {
 
     }
 
-    public class Signs {
+    private class Signs {
 
         private final Elements elements;
         private final Permission Permission;
 
-        public Signs() {
+        private Signs() {
             this.elements = new Elements();
             this.Permission = new Permission(plugin);
         }
 
-        public SignTesterStatus icWeather(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus icWeather(Player player, String l2, String l3, String l4, boolean interact) {
             String[] s = l2.split(" ");
             if (s.length == 2) {
                 if (elements.getWeatherList().contains(s[0])) {
@@ -219,7 +238,7 @@ public class SignTester {
             return SignTesterStatus.Misspelled;
         }
 
-        public SignTesterStatus Time(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus Time(Player player, String l2, String l3, String l4, boolean interact) {
             if (l2.contains(":")) {
                 String[] split = l2.split(":");
                 try {
@@ -281,7 +300,7 @@ public class SignTester {
             return SignTesterStatus.Misspelled;
         }
 
-        public SignTesterStatus Heal(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus Heal(Player player, String l2, String l3, String l4, boolean interact) {
             if ((l2.isBlank() || l2.isEmpty()) || elements.getHealList().contains(l2) || Utils.StringUtils.isNumeric(l2)) {
                 if (!interact) {
                     if (player.isAdmin()) {
@@ -323,7 +342,7 @@ public class SignTester {
             return SignTesterStatus.Misspelled;
         }
 
-        public SignTesterStatus Spawn(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus Spawn(Player player, String l2, String l3, String l4, boolean interact) {
             if (!interact) {
                 if (player.isAdmin()) {
                     return SignTesterStatus.OK;
@@ -356,7 +375,7 @@ public class SignTester {
             return st;
         }
 
-        public SignTesterStatus Teleport(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus Teleport(Player player, String l2, String l3, String l4, boolean interact) {
             String[] split = l2.split(" ");
             if (split.length == 3) {
                 int x, y, z;
@@ -384,7 +403,7 @@ public class SignTester {
             return SignTesterStatus.Misspelled;
         }
 
-        public SignTesterStatus setGroup(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus setGroup(Player player, String l2, String l3, String l4, boolean interact) {
             List<String> sGroups = new ArrayList<>();
             sGroups.addAll(Arrays.asList(Server.getAllPermissionGroups()));
             if (sGroups.contains(l2) && sGroups.contains(l3)) {
@@ -405,7 +424,7 @@ public class SignTester {
             return SignTesterStatus.Misspelled;
         }
 
-        public SignTesterStatus Warp(Player player, String l2, String l3, String l4, boolean interact) {
+        private SignTesterStatus Warp(Player player, String l2, String l3, String l4, boolean interact) {
             if (plugin.Warps.getWarpNames().contains(l2)) {
                 if (!interact) {
                     if (player.isAdmin()) {

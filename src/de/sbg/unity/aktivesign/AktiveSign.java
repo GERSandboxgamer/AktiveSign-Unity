@@ -15,7 +15,6 @@ public class AktiveSign extends Plugin {
     private ConfigManager configManager;
     public Config Config;
     public asConsole Console;
-    public asColor Colors;
     public Warps Warps;
     public asAttribute Attribute;
     public asSign Sign;
@@ -34,7 +33,6 @@ public class AktiveSign extends Plugin {
 
             }
             if (Config.iniConifg()) {
-                Colors = new asColor();
                 this.Warps = new Warps(this);
                 this.Database = new asDatabase(this, Console);
                 try {
@@ -211,40 +209,5 @@ public class AktiveSign extends Plugin {
         }
 
     }
-
-    public final class asColor {
-
-        public final TextColor TextColor;
-        public final SignColor SignColor;
-
-        public asColor() {
-            this.TextColor = new TextColor();
-            this.SignColor = new SignColor();
-        }
-
-        public final class TextColor {
-
-            public final String Red, Green, Orange;
-
-            public TextColor() {
-                this.Red = "[#ff0000]";
-                this.Green = "[#00ff00]";
-                this.Orange = "[#ffa500]";
-            }
-        }
-
-        public final class SignColor {
-
-            public final int red, green, black;
-
-            public SignColor() {
-                this.red = 0xFF0000;
-                this.green = 0x00FF00;
-                this.black = 0x000000;
-            }
-
-        }
-
-    }
-
+    
 }
