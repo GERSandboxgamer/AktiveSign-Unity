@@ -1,6 +1,7 @@
 package de.sbg.unity.aktivesigntools.Tools;
 
 import de.sbg.unity.aktivesigntools.Tools.Tool.ToolTyp;
+import net.risingworld.api.Timer;
 
 /**
  * 
@@ -11,15 +12,29 @@ public class Clock  extends Tool{
     
     private final DFormat DateFormat;
     private final TFormat TimeFormat;
-    //TODO private final Timer Timer;
+    private Timer Update;
     
     public Clock(long l, ToolTyp tt, DFormat df, TFormat tf) {
         super(l, tt);
         DateFormat = df;
         TimeFormat = tf;
-        //TODO Timer = new Timer()
+        
     }
-
+    
+    public void startUpdater() {
+        Update = new Timer(1f, 0f, -1, () ->{
+            //TODO Update
+        });
+    }
+    
+    public boolean stopTimer(){
+        if (Update.isActive()){
+            Update.kill();
+            return true;
+        }
+        return false;
+    }
+    
     public DFormat getDateFormat() {
         return DateFormat;
     }

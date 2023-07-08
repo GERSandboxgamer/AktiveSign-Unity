@@ -1,5 +1,8 @@
 package de.sbg.unity.aktivesigntools.Tools;
 
+import net.risingworld.api.World;
+import net.risingworld.api.objects.Sign;
+
 public class Tool {
 
     private final long GlobalSignID;
@@ -12,6 +15,10 @@ public class Tool {
 
     public long getGlobalSignID() {
         return GlobalSignID;
+    }
+    
+    public Sign getSign() {
+        return World.getSign(GlobalSignID);
     }
 
     public ToolTyp getToolTyp() {
