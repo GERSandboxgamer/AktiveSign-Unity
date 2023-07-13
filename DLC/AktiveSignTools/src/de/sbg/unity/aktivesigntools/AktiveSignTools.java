@@ -22,7 +22,11 @@ public class AktiveSignTools extends Plugin {
      */
     public astSigns Signs;
     private asConsole Console;
-    private AktiveSign AS;
+    
+    /**
+     * @hidden
+     */
+    public AktiveSign AS;
 
     @Override
     public void onEnable() {

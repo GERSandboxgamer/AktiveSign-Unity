@@ -32,7 +32,7 @@ public final class Update implements Listener {
      */
     public Update(Plugin plugin, String URL) throws IOException, URISyntaxException {
         this.plugin = plugin;
-        this.currentVersion = plugin.getDescription("name");
+        this.currentVersion = plugin.getDescription("version");
         this.url = new URI(URL);
         Scanner = new Scanner(url.toURL().openStream());
         if (Scanner.hasNext()) {

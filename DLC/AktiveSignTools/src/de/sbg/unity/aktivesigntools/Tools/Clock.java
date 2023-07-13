@@ -1,29 +1,39 @@
+
 package de.sbg.unity.aktivesigntools.Tools;
 
-import de.sbg.unity.aktivesigntools.Tools.Tool.ToolTyp;
+import de.sbg.unity.aktivesign.Utils.SignFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import net.risingworld.api.Server;
 import net.risingworld.api.Timer;
+import net.risingworld.api.objects.Sign;
+import net.risingworld.api.objects.Time;
 
-/**
- * 
- * @author pbronke
- * 
- */
-public class Clock  extends Tool{
+
+public class Clock extends Tool{
     
     private final DFormat DateFormat;
-    private final TFormat TimeFormat;
+    private final SignFormat format;
+    private final boolean GameTime;
     private Timer Update;
     
-    public Clock(long l, ToolTyp tt, DFormat df, TFormat tf) {
-        super(l, tt);
+    public Clock(long l, DFormat df, boolean gameTime) {
+        super(l);
         DateFormat = df;
-        TimeFormat = tf;
-        
+        this.format = new SignFormat();
+        this.GameTime = gameTime;
+    }
+
+    public boolean isGameTime() {
+        return GameTime;
     }
     
     public void startUpdater() {
         Update = new Timer(1f, 0f, -1, () ->{
-            //TODO Update
+            Sign s = getSign();
+            s.setText(format.replaceText(2, getTime(), s.getText()));
+            s.setText(format.replaceText(3, getDate(), s.getText()));
         });
     }
     
@@ -38,14 +48,6 @@ public class Clock  extends Tool{
     public DFormat getDateFormat() {
         return DateFormat;
     }
-
-    /**
-     * Get the Time-Format
-     * @return The Time-Format as TFormat
-     */
-    public TFormat getTimeFormat() {
-        return TimeFormat;
-    }
     
     /**
      * Get the Time
@@ -53,18 +55,35 @@ public class Clock  extends Tool{
      * @hidden   
      */
     
-    public String getTime(){
-        return null;
+    private String getTime(){
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime t;
+        if (GameTime) {
+            t = LocalTime.of(Server.getGameTime(Time.Unit.Hours), Server.getGameTime(Time.Unit.Minutes), Server.getGameTime(Time.Unit.Seconds));
+            return t.format(myFormatObj);
+        }
+        t = LocalTime.now();
+        return t.format(myFormatObj);
     }
     
     /**
      *
      * @return
-     * @deprecated
      */
-    @Deprecated
-    public String getDate() {
-        return null;
+    private String getDate() {
+        LocalDate d;
+        DateTimeFormatter formatter;
+        switch (DateFormat) {
+            case DDMMYYYY -> formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            case YYYYMMDD -> formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            default -> formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        }
+        if (GameTime) {
+            d = LocalDate.of(Server.getGameTime(Time.Unit.Years), Server.getGameTime(Time.Unit.Months), Server.getGameTime(Time.Unit.Days));
+            return d.format(formatter);
+        }
+        d = LocalDate.now();
+        return d.format(formatter);
     }
     
     /**
@@ -81,22 +100,6 @@ public class Clock  extends Tool{
          * Format Datum to DD.MM.YYYY.
          */
         DDMMYYYY;
-    }
-    
-    /**
-     * Time-Format
-     */
-    public enum TFormat {
-
-        /**
-         * Get Time in 12h-format
-         */
-        Time12h, 
-
-        /**
-         * Get Time in 24h-format
-         */
-        Time24h;
     }
     
 }

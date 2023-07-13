@@ -1,8 +1,9 @@
 package de.sbg.unity.aktivesign;
 
 import de.sbg.unity.aktivesign.Database.asDatabase;
+import de.sbg.unity.aktivesign.Events.asEvents;
 import de.sbg.unity.aktivesign.Objects.Warps;
-import de.sbg.unity.aktivesign.Objects.asSign;
+import de.sbg.unity.aktivesign.Objects.SignManager;
 import de.sbg.unity.configmanager.ConfigData;
 import de.sbg.unity.configmanager.ConfigManager;
 import java.io.IOException;
@@ -17,7 +18,7 @@ public class AktiveSign extends Plugin {
     public asConsole Console;
     public Warps Warps;
     public asAttribute Attribute;
-    public asSign Sign;
+    public SignManager Sign;
     private boolean update;
     public asDatabase Database;
 
@@ -40,16 +41,21 @@ public class AktiveSign extends Plugin {
                 } catch (SQLException ex) {
                     
                 }
+                this.Attribute = new asAttribute();
+                this.Sign = new SignManager(this, Console);
+                Sign.iniSigns();
             }
         }
 
         Console.sendInfo("Check for Updates...");
         try {
-            Update up = new Update(this, "http://gs.sandboxgamer.de/downloads/Plugins/risingworld/unity/ConfigManager/version.txt");
+            Update up = new Update(this, "http://gs.sandboxgamer.de/downloads/Plugins/risingworld/unity/AktiveSign/version.txt");
             update = up.hasUpdate();
         } catch (IOException | URISyntaxException ioex) {
             update = false;
         }
+        
+        registerEventListener(new asEvents(this, Console));
 
     }
 
@@ -70,7 +76,7 @@ public class AktiveSign extends Plugin {
 
         public int Debug;
         public boolean Warp_Command_OnlyAdmin, UseSign_Weather, UseSign_Time, UseSign_Heal, UseSign_Journal, UseSign_setGroup,
-                UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn;
+                UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn, UseSign_Gamemode;
         private final ConfigData Data;
         private final boolean asHome, asTrade, asTools;
 
@@ -106,6 +112,7 @@ public class AktiveSign extends Plugin {
                 Data.addEmptyLine();
                 Data.addCommend("# Switch signs on or off");
                 //Data.addSetting("UseSign_AdminHelp", true);
+                Data.addSetting("UseSign_Gamemode", true);
                 Data.addSetting("UseSign_Heal", true);
                 //Data.addSetting("UseSign_Journal", true);
                 Data.addSetting("UseSign_setGroup", true);
@@ -200,12 +207,17 @@ public class AktiveSign extends Plugin {
             UseSign_Time = Boolean.parseBoolean(Data.getSetting("UseSign_Time"));
             UseSign_Heal = Boolean.parseBoolean(Data.getSetting("UseSign_Heal"));
             UseSign_setGroup = Boolean.parseBoolean(Data.getSetting("UseSign_setGroup"));
-            UseSign_Journal = Boolean.parseBoolean(Data.getSetting("UseSign_Journal"));
-            UseSign_Warp = Boolean.parseBoolean(Data.getSetting("UseSign_Warp"));
+            //UseSign_Journal = Boolean.parseBoolean(Data.getSetting("UseSign_Journal"));
+            //UseSign_Warp = Boolean.parseBoolean(Data.getSetting("UseSign_Warp"));
             UseSign_Teleport = Boolean.parseBoolean(Data.getSetting("UseSign_Teleport"));
-            UseSign_ShowMap = Boolean.parseBoolean(Data.getSetting("UseSign_ShowMap"));
-            UseSign_AdminHelp = Boolean.parseBoolean(Data.getSetting("UseSign_AdminHelp"));
+            //UseSign_ShowMap = Boolean.parseBoolean(Data.getSetting("UseSign_ShowMap"));
+            //UseSign_AdminHelp = Boolean.parseBoolean(Data.getSetting("UseSign_AdminHelp"));
             UseSign_Spawn = Boolean.parseBoolean(Data.getSetting("UseSign_Spawn"));
+            UseSign_Gamemode = Boolean.parseBoolean(Data.getSetting("UseSign_Gamemode"));
+            UseSign_Journal = false;
+            UseSign_Warp = false;
+            UseSign_ShowMap = false;
+            UseSign_AdminHelp = false;
         }
 
     }

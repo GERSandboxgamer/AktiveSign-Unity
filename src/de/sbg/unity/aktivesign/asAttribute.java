@@ -6,47 +6,37 @@ import net.risingworld.api.objects.Player;
 public class asAttribute {
     
     public final PlayerAttribute Player;
-    public final ObjectAttribute Object;
     
-    public asAttribute(AktiveSign plugin) {
-        this.Player = new PlayerAttribute(plugin);
-        this.Object = new ObjectAttribute(plugin);
+    public asAttribute() {
+        this.Player = new PlayerAttribute();
     }
     
     public class PlayerAttribute {
         
-        private final AktiveSign plugin;
-        public SignAttribute Sign;
+        public final SignAttribute Sign;
         
-        public PlayerAttribute(AktiveSign plugin){
-            this.plugin = plugin;
+        public PlayerAttribute(){
+            this.Sign = new SignAttribute();
         }
         
         public class SignAttribute {
             
-            private final String Edit;
+            private final String EditMode;
             
             public SignAttribute(){
-                Edit = "AktiveSign_PlayerAttribute_Sign_Edit";
+                EditMode = "AktiveSign_PlayerAttribute_Sign_EditMode";
             }
             
-            public boolean getEdit(Player player){
-                return (boolean)player.getAttribute(Edit);
+            public boolean getEditMode(Player player){
+                return (boolean)player.getAttribute(EditMode);
             }
             
+            public void setEditMode(Player player, boolean editmode) {
+                player.setAttribute(EditMode, editmode);
+            }            
         }
         
         
     }
     
-    public class ObjectAttribute {
-        
-        private final AktiveSign plugin;
-        
-        public ObjectAttribute(AktiveSign plugin){
-            this.plugin = plugin;
-        }
-    }
-    
-        
 }

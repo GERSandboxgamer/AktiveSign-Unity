@@ -11,16 +11,18 @@ public class TestSignEvent extends PlayerSignEvent{
     private SignTesterStatus SignTesterStatus;
     private final Sign sign;
     
-    public TestSignEvent(Player player, String l1, String l2, String l3, String l4) {
-        super(player, l1, l2, l3, l4);
+    public TestSignEvent(Player player, String SignText) {
+        super(player, SignText);
         this.Interaction = false;
         this.sign = null;
+        this.SignTesterStatus = SignTesterStatus.Nothing;
     }
     
     public TestSignEvent(Player player, boolean interaction, Sign sign) {
         super(player, sign);
         this.sign = sign;
         this.Interaction = interaction;
+        this.SignTesterStatus = SignTesterStatus.Nothing;
     }  
     
     public boolean isInteraction() {
@@ -35,6 +37,11 @@ public class TestSignEvent extends PlayerSignEvent{
         this.SignTesterStatus = SignTesterStatus;
     }
 
+    /**
+     * Get the sign.
+     * <b>Note: Only if interaction is true</b>
+     * @return
+     */
     public Sign getSign() {
         return sign;
     }   

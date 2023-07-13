@@ -1,12 +1,14 @@
+
 package de.sbg.unity.aktivesigntools.Tools;
 
 import de.sbg.unity.aktivesigntools.asConsole;
 import java.util.HashMap;
+import net.risingworld.api.objects.Sign;
+
 
 public class Tools {
-
     private final HashMap<Long, Tool> ToolList;
-    private final GlobalChest GlobalChest;
+    public final GlobalChest GlobalChest;
     private final asConsole Console;
 
     public Tools(asConsole Console) {
@@ -15,9 +17,11 @@ public class Tools {
         this.Console = Console;
     }
 
-   //TODO isTool(Sign)
+    public boolean isTool(Sign sign) {
+        return isTool(sign.getID());
+    }
 
-    private boolean isTool(long globalID) {
+    public boolean isTool(long globalID) {
         for (Tool t : ToolList.values()) {
             if (t.getGlobalSignID() == globalID) {
                 return true;
@@ -42,9 +46,4 @@ public class Tools {
     public HashMap<Long, Tool> getToolList() {
         return ToolList;
     }
-
-    public GlobalChest getGlobalChest() {
-        return GlobalChest;
-    }
-
 }

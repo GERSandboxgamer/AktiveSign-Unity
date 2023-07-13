@@ -1,17 +1,12 @@
 package de.sbg.unity.aktivesign.Objects.Tester;
 
-import de.sbg.unity.aktivesign.AktiveSign;
 import net.risingworld.api.objects.Player;
 
 public class Permission {
 
-    public Permission(AktiveSign plugin) {
-
-    }
-
     public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4) {
-         if (Group(player, l3)) {
-             if (Money(player, l4)) {
+         if (hasGroup(player, l3)) {
+             if (hasMoney(player, l4)) {
                  return SignTester.SignTesterStatus.OK;
              } else {
                  return SignTester.SignTesterStatus.Money;
@@ -20,16 +15,16 @@ public class Permission {
          return SignTester.SignTesterStatus.Permission;
     }
 
-    private boolean Group(Player player, String l3) {
-        if (l3.isEmpty() || l3.isBlank()) {
+    public boolean hasGroup(Player player, String line) {
+        if (line.isEmpty() || line.isBlank()) {
             return true;
         }
 
-        if (l3.contains(player.getPermissionGroup())) {
+        if (line.contains(player.getPermissionGroup())) {
             return true;
         }
 
-        String[] s1 = l3.split(" ");
+        String[] s1 = line.split(" ");
         if (s1.length >= 1) {
             for (String r : s1) {
                 String[] s2 = r.split(":");
@@ -46,8 +41,7 @@ public class Permission {
         return false;
     }
 
-    private boolean Money(Player player, String l4) {
+    public boolean hasMoney(Player player, String line) {
         return true;
     }
-
 }
