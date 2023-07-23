@@ -1,7 +1,8 @@
 
 package de.sbg.unity.aktivesigntools.Tools;
 
-import de.sbg.unity.aktivesign.Utils.SignFormat;
+import de.sbg.unity.aktivesigntools.AktiveSignTools;
+import de.sbg.unity.aktivesigntools.asConsole;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -14,14 +15,12 @@ import net.risingworld.api.objects.Time;
 public class Clock extends Tool{
     
     private final DFormat DateFormat;
-    private final SignFormat format;
     private final boolean GameTime;
     private Timer Update;
     
-    public Clock(long l, DFormat df, boolean gameTime) {
-        super(l);
+    public Clock(AktiveSignTools plugin, asConsole console, long l, DFormat df, boolean gameTime) {
+        super(plugin, console, l);
         DateFormat = df;
-        this.format = new SignFormat();
         this.GameTime = gameTime;
     }
 
@@ -32,8 +31,8 @@ public class Clock extends Tool{
     public void startUpdater() {
         Update = new Timer(1f, 0f, -1, () ->{
             Sign s = getSign();
-            s.setText(format.replaceText(2, getTime(), s.getText()));
-            s.setText(format.replaceText(3, getDate(), s.getText()));
+            s.setText(plugin.AS.signFormat.replaceText(2, getTime(), s.getText()));
+            s.setText(plugin.AS.signFormat.replaceText(3, getDate(), s.getText()));
         });
     }
     

@@ -1,18 +1,40 @@
 package de.sbg.unity.aktivesign.Objects.Tester;
 
+import de.sbg.unity.aktivesign.AktiveSign;
+import de.sbg.unity.iconomy.Events.Money.AddCashEvent;
+import de.sbg.unity.iconomy.Events.Money.RemoveCashEvent;
+import de.sbg.unity.iconomy.Utils.TransferResult;
+import de.sbg.unity.iconomy.iConomy;
 import net.risingworld.api.objects.Player;
 
 public class Permission {
 
+    private final AktiveSign plugin;
+
+    public Permission(AktiveSign plugin) {
+        this.plugin = plugin;
+    }
+
     public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4) {
-         if (hasGroup(player, l3)) {
-             if (hasMoney(player, l4)) {
-                 return SignTester.SignTesterStatus.OK;
-             } else {
-                 return SignTester.SignTesterStatus.Money;
-             }
-         }
-         return SignTester.SignTesterStatus.Permission;
+        return hasPermissionAndMoney(player, l3, l4, false, false);
+    }
+
+    public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4, boolean interact) {
+        return hasPermissionAndMoney(player, l3, l4, interact, false);
+    }
+
+    public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4, boolean interact, boolean add) {
+        if (hasGroup(player, l3)) {
+            if (hasMoney(player, l4, interact, add)) {
+                return SignTester.SignTesterStatus.OK;
+            } else {
+                if (!interact) {
+                    return SignTester.SignTesterStatus.Misspelled;
+                }
+                return SignTester.SignTesterStatus.Money;
+            }
+        }
+        return SignTester.SignTesterStatus.Permission;
     }
 
     public boolean hasGroup(Player player, String line) {
@@ -42,6 +64,39 @@ public class Permission {
     }
 
     public boolean hasMoney(Player player, String line) {
+        return hasMoney(player, line, false, false);
+    }
+
+    public boolean hasMoney(Player player, String line, boolean interact, boolean add) {
+        boolean hasIC = plugin.getPluginByName("iConomy") != null;
+        if (hasIC) {
+            iConomy ic = (iConomy) plugin.getPluginByName("iConomy");
+            String[] split = line.split(" ");
+            if (!line.isBlank() && !line.isEmpty() && split.length == 2) {
+                if (split[1].equals(ic.Config.Currency)) {
+                    try {
+                        long l = ic.moneyFormat.getMoneyAsLong(split[0]);
+                        if (!interact) {
+                            return true;
+                        }
+
+                        if (add) {
+                            TransferResult tr = ic.CashSystem.addCash(player, l, AddCashEvent.Reason.Sell);
+                            return tr == TransferResult.Successful;
+                        } else {
+                            TransferResult tr = ic.CashSystem.removeCash(player, l, RemoveCashEvent.Reason.Buy);
+                            return tr == TransferResult.Successful;
+                        }
+                    } catch (NumberFormatException ex) {
+                        return false;
+                    }
+                } else {
+                    if (!interact) {
+                        return false;
+                    }
+                }
+            }
+        }
         return true;
     }
 }

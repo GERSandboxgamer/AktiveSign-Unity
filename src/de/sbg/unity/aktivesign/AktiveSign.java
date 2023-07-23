@@ -1,11 +1,16 @@
 package de.sbg.unity.aktivesign;
 
+import de.chaoswg.ClassPluginJSONManager;
+import de.chaoswg.ToolsAPI;
 import de.sbg.unity.aktivesign.Database.asDatabase;
 import de.sbg.unity.aktivesign.Events.asEvents;
 import de.sbg.unity.aktivesign.Objects.Warps;
 import de.sbg.unity.aktivesign.Objects.SignManager;
+import de.sbg.unity.aktivesign.Utils.SignFormat;
+import de.sbg.unity.aktivesign.Utils.TextFormat;
 import de.sbg.unity.configmanager.ConfigData;
 import de.sbg.unity.configmanager.ConfigManager;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -19,62 +24,101 @@ public class AktiveSign extends Plugin {
     public Warps Warps;
     public asAttribute Attribute;
     public SignManager Sign;
-    private boolean update;
+    private Update update;
     public asDatabase Database;
+    public SignFormat signFormat;
+    public TextFormat TextFormat;
+    public asLanguage Language;
+    private ToolsAPI ta;
 
     @Override
     public void onEnable() {
         Console = new asConsole(this);
         Console.sendInfo("Enabled");
-        configManager = (ConfigManager)getPluginByName("ConfigManager");
-        if (configManager != null) {
+        this.signFormat = new SignFormat(this, Console);
+        this.TextFormat = new TextFormat();
+        Console.sendInfo("ini", "Load Config...");
+        configManager = (ConfigManager) getPluginByName("ConfigManager");
+        ta = (ToolsAPI)getPluginByName("ToolsAPI");
+        if (configManager != null && ta != null) {
             try {
                 Config = new Config(this);
             } catch (IOException ex) {
 
             }
             if (Config.iniConifg()) {
+                Console.sendInfo("ini", "Load Config...Done!");
+
+                Console.sendInfo("ini", "Load Warps...");
                 this.Warps = new Warps(this);
+                Console.sendInfo("ini", "Load Warps from Database...");
                 this.Database = new asDatabase(this, Console);
                 try {
+                    Database.iniDatabase();
                     Database.loadAll();
+                    Database.startSaveTimer();
                 } catch (SQLException ex) {
-                    
+
                 }
+                Console.sendInfo("ini", "Load Warps from Database...Done!");
+                Console.sendInfo("ini", "Load Warps...Done!");
+
                 this.Attribute = new asAttribute();
+
+                Console.sendInfo("ini", "Load SignManager...");
                 this.Sign = new SignManager(this, Console);
+                Console.sendInfo("ini", "Load SignManager...Done!");
+
+                Console.sendInfo("ini", "Ini Signs...");
                 Sign.iniSigns();
+                Console.sendInfo("ini", "Ini Signs...Done!");
+
+                Console.sendInfo("ini", "Load Languages...");
+                this.Language = new asLanguage();
+                File fileCongigPhat = new File(getPath() + System.getProperty("file.separator") + "Languages");
+                if (fileCongigPhat.mkdirs()) {
+                    Console.sendInfo("ini", "Erstelle: " + fileCongigPhat.getAbsolutePath());
+                }
+                ClassPluginJSONManager jm = new ClassPluginJSONManager();
+                
+                jm.getBanList().add("defaultLanguage");
+                String configFile = getPath()+System.getProperty("file.separator")+"Languages"+System.getProperty("file.separator")+"Language.json";
+                Console.sendInfo("ini", "Load Languages...Done!");
+                Language = (asLanguage)jm.update(Language, configFile);
+                Console.sendInfo("ini", "Load Languages...Done!");
             }
         }
 
         Console.sendInfo("Check for Updates...");
         try {
-            Update up = new Update(this, "http://gs.sandboxgamer.de/downloads/Plugins/risingworld/unity/AktiveSign/version.txt");
-            update = up.hasUpdate();
+            update = new Update(this, "http://gs.sandboxgamer.de/downloads/Plugins/risingworld/unity/AktiveSign/version.txt");
         } catch (IOException | URISyntaxException ioex) {
-            update = false;
+            Console.sendErr("Load", ioex.getMessage());
         }
-        
+
         registerEventListener(new asEvents(this, Console));
 
     }
 
+    public boolean hasUpdate() {
+        return update.hasUpdate();
+    }
+
     @Override
     public void onDisable() {
-        Console.sendInfo("Desabled");
         try {
             Database.stopSaveTimer();
             Database.saveAll();
             Database.getDatabase().close();
-        } catch (SQLException ex ) {
-            
+        } catch (SQLException ex) {
         }
+        Console.sendInfo("Desabled");
     }
-    
 
     public class Config {
 
         public int Debug;
+        public long Warp_Command_Cost;
         public boolean Warp_Command_OnlyAdmin, UseSign_Weather, UseSign_Time, UseSign_Heal, UseSign_Journal, UseSign_setGroup,
                 UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn, UseSign_Gamemode;
         private final ConfigData Data;
@@ -122,7 +166,7 @@ public class AktiveSign extends Plugin {
                 Data.addSetting("UseSign_Time", true);
                 Data.addSetting("UseSign_Warp", true);
                 Data.addSetting("UseSign_Weather", true);
-                
+
                 if (asTrade) {
                     Data.addEmptyLine();
                     Data.addCommend("#--------------------------------#");
@@ -208,18 +252,17 @@ public class AktiveSign extends Plugin {
             UseSign_Heal = Boolean.parseBoolean(Data.getSetting("UseSign_Heal"));
             UseSign_setGroup = Boolean.parseBoolean(Data.getSetting("UseSign_setGroup"));
             //UseSign_Journal = Boolean.parseBoolean(Data.getSetting("UseSign_Journal"));
-            //UseSign_Warp = Boolean.parseBoolean(Data.getSetting("UseSign_Warp"));
+            UseSign_Warp = Boolean.parseBoolean(Data.getSetting("UseSign_Warp"));
             UseSign_Teleport = Boolean.parseBoolean(Data.getSetting("UseSign_Teleport"));
             //UseSign_ShowMap = Boolean.parseBoolean(Data.getSetting("UseSign_ShowMap"));
             //UseSign_AdminHelp = Boolean.parseBoolean(Data.getSetting("UseSign_AdminHelp"));
             UseSign_Spawn = Boolean.parseBoolean(Data.getSetting("UseSign_Spawn"));
             UseSign_Gamemode = Boolean.parseBoolean(Data.getSetting("UseSign_Gamemode"));
             UseSign_Journal = false;
-            UseSign_Warp = false;
             UseSign_ShowMap = false;
             UseSign_AdminHelp = false;
         }
 
     }
-    
+
 }

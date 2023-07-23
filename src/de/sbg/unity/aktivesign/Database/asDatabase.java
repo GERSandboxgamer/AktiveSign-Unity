@@ -42,12 +42,16 @@ public class asDatabase {
     }
     
     public void startSaveTimer() {
-        SaveTimer = new Timer(60f, 0f, -1, () -> {
+        SaveTimer = new Timer(180f, 0f, -1, () -> {
             try {
                 saveAll();
             } catch (SQLException ex) {
                 stopSaveTimer();
-                //TODO Msg
+                Console.sendErr("DB-saveAll-SQLException", "MSG: " + ex.getMessage());
+                Console.sendErr("DB-saveAll-SQLException", "SQL: " + ex.getSQLState());
+                for (StackTraceElement ste : ex.getStackTrace()) {
+                    Console.sendErr("DB-saveAll-SQLException", ste.toString());
+                }
             }
         });
         SaveTimer.start();
@@ -160,7 +164,7 @@ public class asDatabase {
          * @throws SQLException
          */
         public int addNewWarp(String Warpname, Vector3f pos, Quaternion rot) throws SQLException {
-            pstmt = conn.prepareStatement("INSERT INTO Warps (Warpname, PosX, PosY, PosZ) VALUES (?, ?, ?, ?)");
+            pstmt = conn.prepareStatement("INSERT INTO Warps (Warpname, PosX, PosY, PosZ, RotW, RotX, RotY, RotZ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, Warpname);
             pstmt.setFloat(2, pos.x);
             pstmt.setFloat(3, pos.y);

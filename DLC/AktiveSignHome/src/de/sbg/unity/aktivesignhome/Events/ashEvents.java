@@ -2,7 +2,7 @@
 package de.sbg.unity.aktivesignhome.Events;
 
 import de.sbg.unity.aktivesign.Objects.Tester.SignTester;
-import de.sbg.unity.aktivesign.Objects.asSign;
+import de.sbg.unity.aktivesign.Objects.asSigns;
 import de.sbg.unity.aktivesignhome.AktiveSignHome;
 import de.sbg.unity.aktivesignhome.asConsole;
 import net.risingworld.api.events.Listener;
@@ -16,7 +16,7 @@ public class ashEvents implements Listener{
     }
     
     
-    public class Signs extends asSign {
+    public class Signs extends asSigns {
         
         public Signs(Player player, String SignText, boolean interaction) {
             super(player, SignText, interaction);

@@ -3,7 +3,7 @@ package de.sbg.unity.aktivesign.Objects.Tester;
 import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.Events.TestSignEvent;
 import de.sbg.unity.aktivesign.Objects.Warps.Warp;
-import de.sbg.unity.aktivesign.Objects.asSign;
+import de.sbg.unity.aktivesign.Objects.asSigns;
 import de.sbg.unity.aktivesign.Utils.SignFormat;
 import de.sbg.unity.aktivesign.asConsole;
 import java.util.ArrayList;
@@ -50,89 +50,91 @@ public class SignTester {
             Console.sendDebug("TestSign", "getEditMode = " + plugin.Attribute.Player.Sign.getEditMode(player));
             Console.sendDebug("TestSign", "interact = " + interact);
         }
-        
+
         if (plugin.Attribute.Player.Sign.getEditMode(player)) {
             if (interact) {
                 return SignTesterStatus.EditMode;
             }
         }
-        
+
         if (plugin.Config.Debug > 0) {
             Console.sendDebug("TestSign", "Edit = False");
         }
-        l1 = signFormat.getCommand(lines[0]);
-        if (plugin.Sign.isAktiveSign(l1) && !l1.contains("#")) {
-            if (plugin.Config.Debug > 0) {
-                Console.sendDebug("TestSign", "isAktiveSign");
-                Console.sendDebug("TestSign", "Run Event...");
-                Console.sendDebug("TestSign", "===== Sign =====");
-                Console.sendDebug("TestSign", l1);
-                if (lines.length >= 2) {
-                    Console.sendDebug("TestSign", lines[1]);
-                }
-                if (lines.length >= 3) {
-                    Console.sendDebug("TestSign", lines[2]);
-                }
-                if (lines.length >= 4) {
-                    Console.sendDebug("TestSign", lines[3]);
-                }
-                Console.sendDebug("TestSign", "================");
-            }
-
-            TestSignEvent evt;
-
-            if (interact) {
-                evt = new TestSignEvent(player, interact, sign);
-            } else {
-                evt = new TestSignEvent(player, SignText);
-            }
-            plugin.triggerEvent(evt);
-
-            if (plugin.Config.Debug > 0) {
-                Console.sendDebug("TestSignEvent", "isCanceld == " + evt.isCancelled());
-                Console.sendDebug("TestSignEvent", "EventStatatus == " + evt.getSignTesterStatus());
-            }
-
-            if (evt.isCancelled()) {
-                return SignTesterStatus.EventCancel;
-            }
-
-            if (evt.getSignTesterStatus() == SignTesterStatus.Nothing) {
-
-                Signs signs = new Signs(player, SignText, interact);
-
-                // Run Signs
-                //TODO Signs
-                switch (l1) {
-                    case "[Weather]":
-                        return signs.icWeather();
-                    case "[Time]":
-                        return signs.Time();
-                    case "[Gamemode]":
-                        return signs.Gamemode();
-                    case "[Heal]":
-                        return signs.Heal();
-                    //case "[Journal]":
-                    //return signs.Journal();
-                    case "[Warp]":
-                        return signs.Warp();
-                    case "[Spawn]":
-                        return signs.Spawn();
-                    //case "[ShowMap]":
-                    //return signs.ShowMap();
-                    //case "[AdminHelp]":
-                    //return signs.AdminHelp();
-                    case "[Teleport]":
-                        return signs.Teleport();
-                    case "[setGroup]":
-                        return signs.setGroup();
+        if (!lines[0].contains("#")) {
+            l1 = signFormat.getCommand(lines[0]);
+            if (plugin.Sign.isAktiveSign(l1)) {
+                if (plugin.Config.Debug > 0) {
+                    Console.sendDebug("TestSign", "isAktiveSign");
+                    Console.sendDebug("TestSign", "Run Event...");
+                    Console.sendDebug("TestSign", "===== Sign =====");
+                    Console.sendDebug("TestSign", l1);
+                    if (lines.length >= 2) {
+                        Console.sendDebug("TestSign", lines[1]);
+                    }
+                    if (lines.length >= 3) {
+                        Console.sendDebug("TestSign", lines[2]);
+                    }
+                    if (lines.length >= 4) {
+                        Console.sendDebug("TestSign", lines[3]);
+                    }
+                    Console.sendDebug("TestSign", "================");
                 }
 
-            } else {
-                if (evt.getSignTesterStatus() == null) {
-                    return SignTesterStatus.Nothing;
+                TestSignEvent evt;
+
+                if (interact) {
+                    evt = new TestSignEvent(player, interact, sign);
+                } else {
+                    evt = new TestSignEvent(player, SignText);
                 }
-                return evt.getSignTesterStatus();
+                plugin.triggerEvent(evt);
+
+                if (plugin.Config.Debug > 0) {
+                    Console.sendDebug("TestSignEvent", "isCanceld == " + evt.isCancelled());
+                    Console.sendDebug("TestSignEvent", "EventStatatus == " + evt.getSignTesterStatus());
+                }
+
+                if (evt.isCancelled()) {
+                    return SignTesterStatus.EventCancel;
+                }
+
+                if (evt.getSignTesterStatus() == SignTesterStatus.Nothing) {
+
+                    Signs signs = new Signs(player, SignText, interact);
+
+                    // Run Signs
+                    //TODO Signs
+                    switch (l1) {
+                        case "[Weather]":
+                            return signs.icWeather();
+                        case "[Time]":
+                            return signs.Time();
+                        case "[Gamemode]":
+                            return signs.Gamemode();
+                        case "[Heal]":
+                            return signs.Heal();
+                        //case "[Journal]":
+                        //return signs.Journal();
+                        case "[Warp]":
+                            return signs.Warp();
+                        case "[Spawn]":
+                            return signs.Spawn();
+                        //case "[ShowMap]":
+                        //return signs.ShowMap();
+                        //case "[AdminHelp]":
+                        //return signs.AdminHelp();
+                        case "[Teleport]":
+                            return signs.Teleport();
+                        case "[setGroup]":
+                            return signs.setGroup();
+                    }
+
+                } else {
+                    if (evt.getSignTesterStatus() == null) {
+                        return SignTesterStatus.Nothing;
+                    }
+                    return evt.getSignTesterStatus();
+                }
             }
         }
 
@@ -164,7 +166,7 @@ public class SignTester {
 
     }
 
-    private class Signs extends asSign {
+    private class Signs extends asSigns {
 
         private final Elements elements;
         private final Permission Permission;
@@ -173,7 +175,7 @@ public class SignTester {
         private Signs(Player player, String SignText, boolean interaction) {
             super(player, SignText, interaction);
             this.elements = new Elements();
-            this.Permission = new Permission();
+            this.Permission = new Permission(plugin);
             this.player = player;
         }
 
@@ -186,18 +188,35 @@ public class SignTester {
                             return SignTesterStatus.OK;
                         }
                         return SignTesterStatus.Permission;
-                    } else {
-                        SignTesterStatus p = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
-                        if (p != SignTesterStatus.Permission || p != SignTesterStatus.Money) {
-                            WeatherDefs.Weather w = Definitions.getWeather(s[0]);
-                            Server.setWeather(w, Boolean.parseBoolean(s[1]));
-                            return SignTesterStatus.OK;
-                        }
-                        return p;
                     }
+                    SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
+                    if (st != SignTesterStatus.Permission || st != SignTesterStatus.Money) {
+                        WeatherDefs.Weather w = Definitions.getWeather(s[0]);
+                        Server.setWeather(w, Boolean.parseBoolean(s[1]));
+                        //TODO Msg
+                        return SignTesterStatus.OK;
+                    }
+                    return st;
                 }
             }
-            //TODO length == 1
+            if (s.length == 1) {
+                elements.getWeatherList().contains(getLine(2));
+                if (!isInteract()) {
+                    if (player.isAdmin()) {
+                        return SignTesterStatus.OK;
+                    }
+                    return SignTesterStatus.Permission;
+                }
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
+                if (st != SignTesterStatus.Permission || st != SignTesterStatus.Money) {
+                    WeatherDefs.Weather w = Definitions.getWeather(s[0]);
+                    Server.setWeather(w, true);
+                    //TODO Msg
+                    return SignTesterStatus.OK;
+                }
+                return st;
+
+            }
             return SignTesterStatus.Misspelled;
         }
 
@@ -216,9 +235,10 @@ public class SignTester {
                                 return SignTesterStatus.Permission;
                             }
                         }
-                        SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                        SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                         if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                             Server.setGameTime(h, m);
+                            //TODO Msg Time_Number
                             return SignTesterStatus.OK;
                         }
                         return st;
@@ -238,7 +258,7 @@ public class SignTester {
                     return SignTesterStatus.Permission;
                 }
 
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     switch (getLine(2)) {
                         case "day" ->
@@ -256,6 +276,7 @@ public class SignTester {
                         case "morning" ->
                             Server.setGameTime(6, 0);
                     }
+                    //TODO Msg Time
                     return SignTesterStatus.OK;
                 }
                 return st;
@@ -271,7 +292,7 @@ public class SignTester {
                     }
                     return SignTesterStatus.Permission;
                 }
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     if (Utils.StringUtils.isNumeric(getLine(2))) {
                         int newHealth = player.getHealth() + Integer.parseInt(getLine(2));
@@ -280,28 +301,36 @@ public class SignTester {
                         } else {
                             player.setHealth(newHealth);
                         }
+                        //TODO Msg Heal_MoreLive
                         return SignTesterStatus.OK;
                     }
-                    switch (getLine(2)) {
-                        case "all" -> {
+                    if (getLine(2).contains("all")) {
                             player.setBleeding(false);
                             player.setBrokenBones(false);
                             player.setHunger(100);
                             player.setThirst(100);
                             player.setHealth(player.getMaxHealth());
-                        }
-                        case "bleeding" ->
+                            //TODO Msg Heal_All
+                    }
+                    if (getLine(2).contains("bleeding")) {
                             player.setBleeding(false);
-                        case "brokenbones" ->
+                            //TODO Msg Heal_Bleeding
+                    }
+                    if (getLine(2).contains("brokenbones") || getLine(2).contains("fracture")) {
                             player.setBrokenBones(false);
-                        case "fracture" ->
-                            player.setBrokenBones(false);
-                        case "hunger" ->
-                            player.setHunger(100);
-                        case "maxlive" ->
-                            player.setHealth(player.getMaxHealth());
-                        case "thirst" ->
+                            //TODO Msg Heal_BrokenBones
+                    }
+                    if (getLine(2).contains("hunger")) {
+                           player.setHunger(100);
+                           //TODO Msg Heal_Hunger
+                    }
+                    if (getLine(2).contains("thirst")) {
                             player.setThirst(100);
+                            //TODO Msg Heal_Thirst
+                    }
+                    if (getLine(2).contains("maxlive")) {
+                            player.setHealth(player.getMaxHealth());
+                            //TODO Msg Heal_MaxLive
                     }
                     return SignTesterStatus.OK;
                 }
@@ -318,9 +347,13 @@ public class SignTester {
                 }
                 return SignTesterStatus.Permission;
             }
-            SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+            SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
             if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                 switch (getLine(2)) {
+                    case "respawn" -> {
+                        player.setPosition(player.getSpawnPosition(SpawnPointType.Primary));
+                        player.setRotation(player.getSpawnRotation(SpawnPointType.Primary));
+                    }
                     case "primary" -> {
                         player.setPosition(player.getSpawnPosition(SpawnPointType.Primary));
                         player.setRotation(player.getSpawnRotation(SpawnPointType.Primary));
@@ -338,7 +371,11 @@ public class SignTester {
                         player.setRotation(Server.getDefaultSpawnRotation());
                     }
                 }
-                //TODO Msg
+                if (getLine(2).isBlank() || getLine(2).isEmpty()) {
+                    //TODO Msg Spawn
+                } else {
+                    //TODO Msg Spawn
+                }
                 return SignTesterStatus.OK;
             }
             return st;
@@ -361,7 +398,7 @@ public class SignTester {
                     }
                     return SignTesterStatus.Permission;
                 }
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     player.setPosition(x, y, z);
                     //TODO Msg
@@ -382,7 +419,7 @@ public class SignTester {
                     }
                     return SignTesterStatus.Permission;
                 }
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(2), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(2), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     player.setPermissionGroup(getLine(3));
                     //TODO Msg
@@ -401,7 +438,7 @@ public class SignTester {
                     }
                     return SignTesterStatus.Permission;
                 }
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     Warp warp = plugin.Warps.getWarp(getLine(2));
                     player.setPosition(warp.getPosition());
@@ -423,7 +460,7 @@ public class SignTester {
                     }
                     return SignTesterStatus.Permission;
                 }
-                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4));
+                SignTesterStatus st = Permission.hasPermissionAndMoney(player, getLine(3), getLine(4), isInteract());
                 if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                     switch (getLine(2).toLowerCase()) {
                         case "creative" ->
@@ -439,6 +476,7 @@ public class SignTester {
                         case "1" ->
                             player.setCreativeModeEnabled(true);
                     }
+                    //TODO Msg
                     return SignTesterStatus.OK;
                 }
                 return st;

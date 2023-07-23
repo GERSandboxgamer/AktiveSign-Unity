@@ -1,10 +1,11 @@
 package de.sbg.unity.aktivesigntools.Events;
 
+import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.Events.IniSignEvent;
 import de.sbg.unity.aktivesign.Events.TestSignEvent;
 import de.sbg.unity.aktivesign.Objects.Tester.Permission;
 import de.sbg.unity.aktivesign.Objects.Tester.SignTester.SignTesterStatus;
-import de.sbg.unity.aktivesign.Objects.asSign;
+import de.sbg.unity.aktivesign.Objects.asSigns;
 import de.sbg.unity.aktivesigntools.AktiveSignTools;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
@@ -13,9 +14,11 @@ import net.risingworld.api.objects.Player;
 public class astEvents implements Listener {
 
     private final AktiveSignTools plugin;
+    private final AktiveSign as;
 
-    public astEvents(AktiveSignTools plugin) {
+    public astEvents(AktiveSignTools plugin, AktiveSign as) {
         this.plugin = plugin;
+        this.as = as;
     }
 
     @EventMethod
@@ -41,10 +44,13 @@ public class astEvents implements Listener {
         }
     }
 
-    private class Signs extends asSign {
+    private class Signs extends asSigns {
+        
+        private final Permission permission;
 
         private Signs(Player player, String SignText, boolean interaction) {
             super(player, SignText, interaction);
+            permission = new Permission(as);
         }
 
         private SignTesterStatus MoreHealth() {
@@ -64,7 +70,7 @@ public class astEvents implements Listener {
                     return SignTesterStatus.Permission;
                 }
                 if (getPlayer().getMaxHealth() < max) {
-                    SignTesterStatus st = hasGroupAndMoney(getLine(3), getLine(4));
+                    SignTesterStatus st = permission.hasPermissionAndMoney(getPlayer(), getLine(3), getLine(4), isInteract());
                     if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                         int newMax = getPlayer().getMaxHealth() + h;
                         if (newMax > max) {
@@ -99,7 +105,7 @@ public class astEvents implements Listener {
                     return SignTesterStatus.Permission;
                 }
                 if (getPlayer().getMaxStamina() < max) {
-                    SignTesterStatus st = hasGroupAndMoney(getLine(3), getLine(4));
+                    SignTesterStatus st = permission.hasPermissionAndMoney(getPlayer(), getLine(3), getLine(4), isInteract());
                     if (st != SignTesterStatus.Permission && st != SignTesterStatus.Money) {
                         int newMax = getPlayer().getMaxStamina() + s;
                         if (newMax > max) {

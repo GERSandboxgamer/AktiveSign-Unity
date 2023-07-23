@@ -6,16 +6,17 @@ import de.sbg.unity.aktivesign.Objects.Tester.SignTester;
 import de.sbg.unity.aktivesign.asConsole;
 import java.util.ArrayList;
 import java.util.List;
-
+import net.risingworld.api.objects.Sign;
+import net.risingworld.api.utils.Utils;
 
 public class SignManager {
-    
+
     private final AktiveSign plugin;
     public final SignTester SignTester;
     private final List<String> SignList;
     private final asConsole Console;
-    
-    public SignManager(AktiveSign plugin, asConsole Console){
+
+    public SignManager(AktiveSign plugin, asConsole Console) {
         this.plugin = plugin;
         this.Console = Console;
         this.SignTester = new SignTester(plugin, Console);
@@ -25,8 +26,8 @@ public class SignManager {
     public List<String> getSignList() {
         return SignList;
     }
-    
-    public boolean addSign(String Line1){
+
+    public boolean addSign(String Line1) {
         String s1;
         String finalString;
         if (!Line1.contains("[")) {
@@ -41,7 +42,8 @@ public class SignManager {
         }
         return SignList.add(finalString);
     }
-    public boolean removeSign(String Line1){
+
+    public boolean removeSign(String Line1) {
         String s1;
         String finalString;
         if (!Line1.contains("[")) {
@@ -56,13 +58,23 @@ public class SignManager {
         }
         return SignList.remove(finalString);
     }
-    
-    
+
     public boolean isAktiveSign(String Line1) {
-        return SignList.stream().anyMatch(sign -> (Line1.contains(sign)));
+        if (Line1 != null) {
+            return SignList.stream().anyMatch(sign -> (Line1.contains(sign)));
+        }
+        return false;
     }
-    
-    public void iniSigns(){
+
+    public boolean isAktiveSign(Sign sign) {
+        String[] lines = Utils.StringUtils.getLines(sign.getText());
+        if (sign.getText().isBlank() || sign.getText().isEmpty() || lines.length < 1) {
+            return false;
+        }
+        return isAktiveSign(lines[0]);
+    }
+
+    public void iniSigns() {
         Console.sendInfo("iniSign", "Add signs to List");
         Console.sendInfo("iniSign", "-----------------");
         if (plugin.Config.UseSign_AdminHelp) {
@@ -104,5 +116,5 @@ public class SignManager {
         Console.sendInfo("iniSign", "-----------------");
         plugin.triggerEvent(new IniSignEvent(this));
     }
-        
+
 }
