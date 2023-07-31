@@ -1,0 +1,62 @@
+package de.sbg.unity.aktivesign.Events;
+
+import de.sbg.unity.aktivesign.Objects.Tester.SignTester.SignTesterStatus;
+import net.risingworld.api.objects.Player;
+import net.risingworld.api.objects.Sign;
+
+/**
+ * Trigger, if a player write or interact with a AktiveSign <p>
+ * Here you can add your code, wath a AktiveSign do!
+ * @author Sandboxgamer
+ */
+public class TestSignEvent extends PlayerSignEvent{
+
+    private final boolean Interaction;
+    private SignTesterStatus SignTesterStatus;
+    private final Sign sign;
+    
+    public TestSignEvent(Player player, String SignText) {
+        super(player, SignText);
+        this.Interaction = false;
+        this.sign = null;
+        this.SignTesterStatus = SignTesterStatus.Nothing;
+    }
+    
+    public TestSignEvent(Player player, boolean interaction, Sign sign) {
+        super(player, sign);
+        this.sign = sign;
+        this.Interaction = interaction;
+        this.SignTesterStatus = SignTesterStatus.Nothing;
+    }  
+    
+    /**
+     * Is player interact with the sign?
+     * @return
+     */
+    public boolean isInteraction() {
+        return Interaction;
+    }
+
+    public SignTesterStatus getSignTesterStatus() {
+        return SignTesterStatus;
+    }
+
+    /**
+     * Please set this at the end.
+     * If you set nothing, it return "SignTesterStatus.Nothing"
+     * @param SignTesterStatus
+     */
+    public void setSignTesterStatus(SignTesterStatus SignTesterStatus) {
+        this.SignTesterStatus = SignTesterStatus;
+    }
+
+    /**
+     * Get the sign.
+     * <b>Note: Only if interaction is true</b>
+     * @return The sign as Object
+     */
+    public Sign getSign() {
+        return sign;
+    }   
+    
+}

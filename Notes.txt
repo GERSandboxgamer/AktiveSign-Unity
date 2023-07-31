@@ -1,0 +1,33 @@
+NoPermission
+Player_Not_Connected <Playername>
+Player_Not_Exist <Playername>
+Value_Not_Exist
+Mode_Value_Not_OK
+EditMode_OK <Playername>
+DstroyMod_OK <Playername>
+Setwarp_OK <Warpname>
+Setwarp_Change <Warpname>
+Setwarp_Fail <Warpname>
+Delwarp_OK <Warpname>
+Delwarp_Fail <Warpname>
+Warp_OK <Warpname>
+Warp_Player_OK <Playername> <Warpname>
+WarpList_No_Save
+Warp_Not_Exist <Warpname>
+Misspelled
+Sign_OK
+Sign_Distroy_Fail
+Weather <Wetter>
+Time <Time>
+Time_Number <Int: H> <Int: M>
+Heal
+Heal_MoreLive
+Heal_Bleeding
+Heal_BrokenBones
+Heal_Hunger
+Heal_Thirst
+Heal_MaxLive
+Spawn
+Teleport
+setGroup <Group>
+Gamemode <Gamemode>
