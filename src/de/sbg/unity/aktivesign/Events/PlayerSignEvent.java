@@ -6,7 +6,10 @@ import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
 import net.risingworld.api.utils.Utils;
 
-
+/**
+ * The Main-Class for other events
+ * @author Sandboxgamer
+ */
 public class PlayerSignEvent extends Event implements Cancellable {
 
     private final Player player;

@@ -9,6 +9,7 @@ public class asAttribute {
     public asAttribute() {
         this.Player = new PlayerAttribute();
     }
+    
 
     public class PlayerAttribute {
 

@@ -1,6 +1,7 @@
 package de.sbg.unity.aktivesign.Objects.Tester;
 
 import de.sbg.unity.aktivesign.AktiveSign;
+import de.sbg.unity.aktivesign.asConsole;
 import de.sbg.unity.iconomy.Events.Money.AddCashEvent;
 import de.sbg.unity.iconomy.Events.Money.RemoveCashEvent;
 import de.sbg.unity.iconomy.Utils.TransferResult;
@@ -10,9 +11,11 @@ import net.risingworld.api.objects.Player;
 public class Permission {
 
     private final AktiveSign plugin;
+    private final asConsole Console;
 
-    public Permission(AktiveSign plugin) {
+    public Permission(AktiveSign plugin, asConsole Console) {
         this.plugin = plugin;
+        this.Console = Console;
     }
 
     public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4) {
@@ -26,23 +29,45 @@ public class Permission {
     public SignTester.SignTesterStatus hasPermissionAndMoney(Player player, String l3, String l4, boolean interact, boolean add) {
         if (hasGroup(player, l3)) {
             if (hasMoney(player, l4, interact, add)) {
+                if (plugin.Config.Debug > 0) {
+                    Console.sendDebug("hasPermissionAndMoney", "return = OK");
+                }
                 return SignTester.SignTesterStatus.OK;
             } else {
                 if (!interact) {
+                    if (plugin.Config.Debug > 0) {
+                        Console.sendDebug("hasPermissionAndMoney", "return = Misspelled");
+                    }
                     return SignTester.SignTesterStatus.Misspelled;
+                }
+                if (plugin.Config.Debug > 0) {
+                    Console.sendDebug("hasPermissionAndMoney", "return = Money");
                 }
                 return SignTester.SignTesterStatus.Money;
             }
+        }
+        if (plugin.Config.Debug > 0) {
+            Console.sendDebug("hasPermissionAndMoney", "return = Permission");
         }
         return SignTester.SignTesterStatus.Permission;
     }
 
     public boolean hasGroup(Player player, String line) {
         if (line.isEmpty() || line.isBlank()) {
+            if (plugin.Config.Debug > 0) {
+                Console.sendDebug("hasGroup", "return = true (Empty)");
+            }
             return true;
         }
-
-        if (line.contains(player.getPermissionGroup())) {
+        String g = player.getPermissionGroup();
+        if (plugin.Config.Debug > 0) {
+            Console.sendDebug("hasGroup", "   g = " + g);
+            Console.sendDebug("hasGroup", "Line = " + line);
+        }
+        if (g != null && line.contains(g)) {
+            if (plugin.Config.Debug > 0) {
+                Console.sendDebug("hasGroup", "return = true (Group)");
+            }
             return true;
         }
 
@@ -53,12 +78,18 @@ public class Permission {
                 if (s2.length == 2) {
                     if (s2[0].toLowerCase().equals("p")) {
                         if (player.getUID().equals(s2[1])) {
+                            if (plugin.Config.Debug > 0) {
+                                Console.sendDebug("hasGroup", "return = true (Group/Player)");
+                            }
                             return true;
                         }
                     }
                 }
             }
 
+        }
+        if (plugin.Config.Debug > 0) {
+            Console.sendDebug("hasGroup", "return = false");
         }
         return false;
     }

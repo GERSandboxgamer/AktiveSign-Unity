@@ -1,7 +1,8 @@
 package de.sbg.unity.aktivesigntools.Events;
 
+import de.chaoswg.gui.GUI;
+import de.chaoswg.gui.GUI.UILabelTimer;
 import de.sbg.unity.aktivesign.AktiveSign;
-import de.sbg.unity.aktivesign.Events.IniSignEvent;
 import de.sbg.unity.aktivesign.Events.TestSignEvent;
 import de.sbg.unity.aktivesign.Objects.Tester.Permission;
 import de.sbg.unity.aktivesign.Objects.Tester.SignTester.SignTesterStatus;
@@ -10,6 +11,7 @@ import de.sbg.unity.aktivesigntools.AktiveSignTools;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
 import net.risingworld.api.objects.Player;
+import net.risingworld.api.utils.Utils;
 
 public class astEvents implements Listener {
 
@@ -19,11 +21,6 @@ public class astEvents implements Listener {
     public astEvents(AktiveSignTools plugin, AktiveSign as) {
         this.plugin = plugin;
         this.as = as;
-    }
-
-    @EventMethod
-    public void onIniSignEvent(IniSignEvent event) {
-        plugin.Signs.iniSigns();
     }
 
     @EventMethod
@@ -39,18 +36,50 @@ public class astEvents implements Listener {
                 signs.MoreHealth();
             case "MoreStermina" ->
                 signs.MoreStermina();
+            case "Fly" ->
+                signs.Fly();
             default ->
                 event.setSignTesterStatus(SignTesterStatus.Nothing);
         }
     }
 
     private class Signs extends asSigns {
-        
+
         private final Permission permission;
 
         private Signs(Player player, String SignText, boolean interaction) {
             super(player, SignText, interaction);
-            permission = new Permission(as);
+            permission = as.SignPermission;
+        }
+
+        private SignTesterStatus Fly() {
+            if (Utils.StringUtils.isNumeric(getLine(2))) {
+                try {
+                    long zeit = Long.parseLong(getLine(2));
+                    if (!isInteract()) {
+                        if (getPlayer().isAdmin()) {
+                            return SignTesterStatus.OK;
+                        }
+                        return SignTesterStatus.Permission;
+                    }
+
+                    GUI.UILabelTimer timer = new GUI().new UILabelTimer("Fly", zeit);
+                    timer.setOnTimer((uilt, f) -> {
+                        if (f == 0) {
+                            getPlayer().setFlying(false);
+                            getPlayer().removeUIElement(timer);
+                        }
+                    });
+                    getPlayer().addUIElement(timer);
+                    getPlayer().setFlying(true);
+                    timer.start();
+                    return SignTesterStatus.OK;
+                } catch (NumberFormatException ex) {
+                    return SignTesterStatus.Misspelled;
+                }
+
+            }
+            return SignTesterStatus.Misspelled;
         }
 
         private SignTesterStatus MoreHealth() {

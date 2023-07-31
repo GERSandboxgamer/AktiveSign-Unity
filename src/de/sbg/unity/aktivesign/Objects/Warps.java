@@ -8,7 +8,10 @@ import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.Quaternion;
 import net.risingworld.api.utils.Vector3f;
 
-
+/**
+ * Main-Class for Warps
+ * @author Sandboxgamer
+ */
 public class Warps {
     
     private final List<Warp> WarpList;
@@ -38,6 +41,10 @@ public class Warps {
         return null;
     }
     
+    /**
+     * 
+     * @return
+     */
     public List<Integer> getIDs(){
         List<Integer> list = new ArrayList<>();
         for (Warp w : WarpList) {

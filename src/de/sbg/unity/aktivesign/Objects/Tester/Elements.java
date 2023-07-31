@@ -23,7 +23,7 @@ public class Elements {
         WeatherList = new ArrayList<>();
         WeatherList.add("clear");
         WeatherList.add("sun");
-        WeatherList.add("overcase");
+        WeatherList.add("overcast");
         WeatherList.add("rain");
         WeatherList.add("storm");
         WeatherList.add("snow");
@@ -81,8 +81,6 @@ public class Elements {
         return HealList;
     }
     
-    
-
     public List<String> getAnimalList() {
         return AnimalList;
     }

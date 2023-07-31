@@ -6,6 +6,7 @@ import de.sbg.unity.aktivesign.Database.asDatabase;
 import de.sbg.unity.aktivesign.Events.asEvents;
 import de.sbg.unity.aktivesign.Objects.Warps;
 import de.sbg.unity.aktivesign.Objects.SignManager;
+import de.sbg.unity.aktivesign.Objects.Tester.Permission;
 import de.sbg.unity.aktivesign.Utils.SignFormat;
 import de.sbg.unity.aktivesign.Utils.TextFormat;
 import de.sbg.unity.configmanager.ConfigData;
@@ -16,6 +17,10 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 import net.risingworld.api.Plugin;
 
+/**
+ * Main-Class AktiveSign
+ * @author Sandboxgamer
+ */
 public class AktiveSign extends Plugin {
 
     private ConfigManager configManager;
@@ -30,6 +35,7 @@ public class AktiveSign extends Plugin {
     public TextFormat TextFormat;
     public asLanguage Language;
     private ToolsAPI ta;
+    public Permission SignPermission;
 
     @Override
     public void onEnable() {
@@ -41,6 +47,7 @@ public class AktiveSign extends Plugin {
         configManager = (ConfigManager) getPluginByName("ConfigManager");
         ta = (ToolsAPI)getPluginByName("ToolsAPI");
         if (configManager != null && ta != null) {
+            this.SignPermission = new Permission(this, Console);
             try {
                 Config = new Config(this);
             } catch (IOException ex) {
@@ -115,6 +122,9 @@ public class AktiveSign extends Plugin {
         Console.sendInfo("Desabled");
     }
 
+    /**
+     * The Config-Class
+     */
     public class Config {
 
         public int Debug;
@@ -131,10 +141,20 @@ public class AktiveSign extends Plugin {
             asTools = plugin.getPluginByName("AktiveSignTools") != null;
         }
 
+        /**
+         * Get a setting form the config.
+         * @param key
+         * @return The setting as String
+         */
         public String getSetting(String key) {
             return Data.getSetting(key);
         }
 
+        /**
+         * Set a setting in the config
+         * @param key The key as String
+         * @param value The value as Object
+         */
         public void setSetting(String key, Object value) {
             Data.setSetting(key, value);
             Console.sendInfo("Config", "Change setting '" + key + "' to '" + value + "'!");
@@ -156,7 +176,7 @@ public class AktiveSign extends Plugin {
                 Data.addEmptyLine();
                 Data.addCommend("# Switch signs on or off");
                 //Data.addSetting("UseSign_AdminHelp", true);
-                Data.addSetting("UseSign_Gamemode", true);
+                //Data.addSetting("UseSign_Gamemode", true);
                 Data.addSetting("UseSign_Heal", true);
                 //Data.addSetting("UseSign_Journal", true);
                 Data.addSetting("UseSign_setGroup", true);
@@ -166,6 +186,7 @@ public class AktiveSign extends Plugin {
                 Data.addSetting("UseSign_Time", true);
                 Data.addSetting("UseSign_Warp", true);
                 Data.addSetting("UseSign_Weather", true);
+               
 
                 if (asTrade) {
                     Data.addEmptyLine();
@@ -189,7 +210,7 @@ public class AktiveSign extends Plugin {
                     Data.addCommend("#         AktiveSignTools        #");
                     Data.addCommend("#--------------------------------#");
                     Data.addEmptyLine();
-                    //Data.addCommend("# Switch signs on or off");
+                    Data.addCommend("# Switch signs on or off");
                     //Data.addSetting("UseSign_Alert", true);
                     //Data.addSetting("UseSign_Chest", true);
                     //Data.addSetting("UseSign_ChestTransfer", true);
@@ -198,7 +219,7 @@ public class AktiveSign extends Plugin {
                     //Data.addSetting("UseSign_Dawing", true);
                     //Data.addSetting("UseSign_DoorOpener", true);
                     //Data.addSetting("UseSign_DoorRing", true);
-                    //Data.addSetting("UseSign_Fly", true);
+                    Data.addSetting("UseSign_Fly", true);
                     //Data.addSetting("UseSign_GlobalChest", true);
                     //Data.addSetting("UseSign_Mail", true);
                     //Data.addSetting("UseSign_MoreHealth", true);
@@ -257,10 +278,12 @@ public class AktiveSign extends Plugin {
             //UseSign_ShowMap = Boolean.parseBoolean(Data.getSetting("UseSign_ShowMap"));
             //UseSign_AdminHelp = Boolean.parseBoolean(Data.getSetting("UseSign_AdminHelp"));
             UseSign_Spawn = Boolean.parseBoolean(Data.getSetting("UseSign_Spawn"));
-            UseSign_Gamemode = Boolean.parseBoolean(Data.getSetting("UseSign_Gamemode"));
+            //UseSign_Gamemode = Boolean.parseBoolean(Data.getSetting("UseSign_Gamemode"));
+            UseSign_Gamemode = false;
             UseSign_Journal = false;
             UseSign_ShowMap = false;
             UseSign_AdminHelp = false;
+            
         }
 
     }

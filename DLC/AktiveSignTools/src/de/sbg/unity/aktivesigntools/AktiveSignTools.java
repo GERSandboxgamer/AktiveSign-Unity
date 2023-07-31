@@ -36,7 +36,7 @@ public class AktiveSignTools extends Plugin {
             this.Signs = new astSigns(this, AS, Console);
             this.Config = new Config();
             this.Tools = new Tools(Console);
-            
+            Signs.iniSigns();
         }
     }
 

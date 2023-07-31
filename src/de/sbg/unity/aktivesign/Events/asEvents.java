@@ -18,6 +18,7 @@ import net.risingworld.api.events.player.PlayerConnectEvent;
 import net.risingworld.api.events.player.PlayerObjectInteractionEvent;
 import net.risingworld.api.events.player.PlayerSetSignTextEvent;
 import net.risingworld.api.events.player.world.PlayerDestroyObjectEvent;
+import net.risingworld.api.events.player.world.PlayerRemoveObjectEvent;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
 import net.risingworld.api.objects.world.ObjectElement;
@@ -66,7 +67,14 @@ public class asEvents implements Listener {
                 }
 
                 if (cmd.length == 2) {
-
+                    if (cmd[1].toLowerCase().equals("help")) {
+                        player.sendTextMessage(textFormat.Color("orange", "/warp <Name>"));
+                        player.sendTextMessage(textFormat.Color("orange", "/warps"));
+                        player.sendTextMessage(textFormat.Color("orange", "/setwarp <Name>"));
+                        player.sendTextMessage(textFormat.Color("orange", "/delwarp <Name>"));
+                        player.sendTextMessage(textFormat.Color("orange", "/as edit <true/false>"));
+                        player.sendTextMessage(textFormat.Color("orange", "/as destroy <true/false>"));
+                    }
                 }
 
                 if (cmd.length == 3) {
@@ -103,11 +111,12 @@ public class asEvents implements Listener {
                             plugin.Warps.newWarp(cmd[1], player);
                             player.sendTextMessage(textFormat.Color("green", String.format(plugin.Language.getCommand().getSetwarp_OK(lang), cmd[1])));
                         } catch (SQLException ex) {
-                             player.sendTextMessage(textFormat.Color("red", String.format(plugin.Language.getCommand().getSetwarp_Fail(lang), cmd[1])));
+                            player.sendTextMessage(textFormat.Color("red", String.format(plugin.Language.getCommand().getSetwarp_Fail(lang), cmd[1])));
                         }
                     } else {
                         Warp w = plugin.Warps.getWarp(cmd[1]);
                         w.setPosition(player.getPosition());
+                        
                         w.setRotation(player.getRotation());
                         player.sendTextMessage(textFormat.Color("green", String.format(plugin.Language.getCommand().getSetwarp_Change(lang), cmd[1])));
                     }
@@ -153,7 +162,7 @@ public class asEvents implements Listener {
                             Warp w = plugin.Warps.getWarp(cmd[1]);
                             player.setPosition(w.getPosition());
                             player.setRotation(w.getRotation());
-                            player.sendTextMessage(textFormat.Color("green", "Warp to " + cmd[1] + "!")); //TODO Translate
+                            player.sendTextMessage(textFormat.Color("green", String.format(plugin.Language.getCommand().getWarp_OK(lang), cmd[1])));
                         } else {
                             player.sendTextMessage(textFormat.Color("red", String.format(plugin.Language.getCommand().getWarp_Not_Exist(lang), cmd[1])));
                         }
@@ -244,9 +253,29 @@ public class asEvents implements Listener {
         if (def.type == Objects.Type.Sign) {
             Sign sign = World.getSign(event.getGlobalID());
             if (plugin.Sign.isAktiveSign(sign)) {
-                if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
-                    event.setCancelled(true);
-                    player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                if (!plugin.Sign.isUserSign(sign)) {
+                    if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
+                        event.setCancelled(true);
+                        player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                    }
+                }
+            }
+        }
+    }
+    
+    @EventMethod
+    public void onPlayerRemoveObjectEvent(PlayerRemoveObjectEvent event) {
+        Player player = event.getPlayer();
+        String lang = player.getLanguage();
+        ObjectDefinition def = event.getObjectDefinition();
+        if (def.type == Objects.Type.Sign) {
+            Sign sign = World.getSign(event.getGlobalID());
+            if (plugin.Sign.isAktiveSign(sign)) {
+                if (!plugin.Sign.isUserSign(sign)) {
+                    if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
+                        event.setCancelled(true);
+                        player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                    }
                 }
             }
         }

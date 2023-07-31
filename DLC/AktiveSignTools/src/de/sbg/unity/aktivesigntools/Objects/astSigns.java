@@ -4,20 +4,19 @@ import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesigntools.AktiveSignTools;
 import de.sbg.unity.aktivesigntools.asConsole;
 
-
 public class astSigns {
-    
+
     private final AktiveSignTools plugin;
     private final AktiveSign AS;
     private final asConsole Console;
-    
+
     public astSigns(AktiveSignTools plugin, AktiveSign AS, asConsole Console) {
         this.plugin = plugin;
         this.AS = AS;
         this.Console = Console;
     }
-    
-    public void iniSigns(){
+
+    public void iniSigns() {
         Console.sendInfo("iniSign", "Add signs to List");
         Console.sendInfo("iniSign", "-----------------");
 //        if (plugin.Config.UseSign_Alert) {
@@ -41,9 +40,9 @@ public class astSigns {
 //        if (plugin.Config.UseSign_DoorRing) {
 //            AS.Sign.addSign("DoorRing");
 //        }
-//        if (plugin.Config.UseSign_Fly) {
-//            AS.Sign.addSign("Fly");
-//        }
+        if (plugin.Config.UseSign_Fly) {
+            AS.Sign.addSign("Fly");
+        }
 //        if (plugin.Config.UseSign_GlobalChest) {
 //            AS.Sign.addSign("GlobalChest");
 //        }
@@ -82,5 +81,5 @@ public class astSigns {
         }
         Console.sendInfo("iniSign", "-----------------");
     }
-    
+
 }
