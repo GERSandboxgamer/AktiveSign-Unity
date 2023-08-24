@@ -8,6 +8,7 @@ import de.sbg.unity.aktivesign.Objects.Tester.Permission;
 import de.sbg.unity.aktivesign.Objects.Tester.SignTester.SignTesterStatus;
 import de.sbg.unity.aktivesign.Objects.asSigns;
 import de.sbg.unity.aktivesigntools.AktiveSignTools;
+import de.sbg.unity.aktivesigntools.gui.TimerGUI;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
 import net.risingworld.api.objects.Player;
@@ -22,6 +23,17 @@ public class astEvents implements Listener {
         this.plugin = plugin;
         this.as = as;
     }
+    
+    @EventMethod
+    public void onTimeOverEvent(TimeOverEvent event) {
+        Player player = event.getPlayer();
+        String name = event.getTimerName();
+        TimerGUI gui = event.getGUI();
+        
+        switch (name) {
+            case "Fly" -> player.setFlying(false);
+        }
+    }
 
     @EventMethod
     public void onTestSignEvent(TestSignEvent event) {
@@ -33,11 +45,17 @@ public class astEvents implements Listener {
 
         switch (l1) {
             case "MoreHealth" ->
-                signs.MoreHealth();
+                event.setSignTesterStatus(signs.MoreHealth());
             case "MoreStermina" ->
-                signs.MoreStermina();
+                event.setSignTesterStatus(signs.MoreStermina());
             case "Fly" ->
-                signs.Fly();
+                event.setSignTesterStatus(signs.Fly());
+            case "RunSpeed" ->
+                event.setSignTesterStatus(signs.RunSpeed());
+            case "WalkSpeed" ->
+                event.setSignTesterStatus(signs.WalkSpeed());
+            case "SwimSpeed" ->
+                event.setSignTesterStatus(signs.WalkSpeed());
             default ->
                 event.setSignTesterStatus(SignTesterStatus.Nothing);
         }
@@ -149,6 +167,27 @@ public class astEvents implements Listener {
                 //TODO Msg
                 return SignTesterStatus.Statement;
             }
+            return SignTesterStatus.Misspelled;
+        }
+        
+        public SignTesterStatus RunSpeed() {
+            
+            
+            
+            return SignTesterStatus.Misspelled;
+        }
+        
+        public SignTesterStatus WalkSpeed() {
+            
+            
+            
+            return SignTesterStatus.Misspelled;
+        }
+        
+        public SignTesterStatus SwimSpeed() {
+            
+            
+            
             return SignTesterStatus.Misspelled;
         }
 

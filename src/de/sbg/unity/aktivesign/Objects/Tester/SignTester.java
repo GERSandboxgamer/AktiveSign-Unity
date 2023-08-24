@@ -1,6 +1,5 @@
 package de.sbg.unity.aktivesign.Objects.Tester;
 
-import de.chaoswg.gui.GUI;
 import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.Events.TestSignEvent;
 import de.sbg.unity.aktivesign.Objects.Warps.Warp;

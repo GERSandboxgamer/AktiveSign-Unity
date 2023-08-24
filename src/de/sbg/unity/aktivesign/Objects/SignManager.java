@@ -3,8 +3,11 @@ package de.sbg.unity.aktivesign.Objects;
 import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.Objects.Tester.SignTester;
 import de.sbg.unity.aktivesign.asConsole;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
 import net.risingworld.api.utils.Utils;
 
@@ -14,21 +17,25 @@ import net.risingworld.api.utils.Utils;
 public class SignManager {
 
     private final AktiveSign plugin;
-    public final SignTester SignTester;
     private final List<String> SignList;
     private final List<String> UserSign;
     private final asConsole Console;
 
+    public final SignTester signTester;
+    public final SavedSigns savedSigns;
+
     public SignManager(AktiveSign plugin, asConsole Console) {
         this.plugin = plugin;
         this.Console = Console;
-        this.SignTester = new SignTester(plugin, Console);
+        this.signTester = new SignTester(plugin, Console);
+        this.savedSigns = new SavedSigns();
         this.SignList = new ArrayList<>();
         this.UserSign = new ArrayList<>();
     }
 
     /**
      * Get a list of all UserSign
+     *
      * @return A list of all UserSign
      */
     public List<String> getUserSign() {
@@ -37,6 +44,7 @@ public class SignManager {
 
     /**
      * Add a UserSign
+     *
      * @param Line1
      * @return
      */
@@ -55,9 +63,10 @@ public class SignManager {
         }
         return SignList.add(finalString) && UserSign.add(finalString);
     }
-    
+
     /**
      * Remove a UserSign
+     *
      * @param Line1
      * @return
      */
@@ -79,6 +88,7 @@ public class SignManager {
 
     /**
      * Is the sign a UserSign
+     *
      * @param Line1
      * @return true or false
      */
@@ -91,6 +101,7 @@ public class SignManager {
 
     /**
      * Is the sign a UserSign
+     *
      * @param sign
      * @return true or false
      */
@@ -104,6 +115,7 @@ public class SignManager {
 
     /**
      * Get a list of all AktiveSign
+     *
      * @return
      */
     public List<String> getSignList() {
@@ -112,6 +124,7 @@ public class SignManager {
 
     /**
      * Add a sign
+     *
      * @param Line1
      * @return
      */
@@ -133,6 +146,7 @@ public class SignManager {
 
     /**
      * Remove a sign
+     *
      * @param Line1
      * @return
      */
@@ -154,6 +168,7 @@ public class SignManager {
 
     /**
      * Is the sign a AktiveSign
+     *
      * @param Line1
      * @return true or false
      */
@@ -166,6 +181,7 @@ public class SignManager {
 
     /**
      * Is the sign a AktiveSign
+     *
      * @param sign
      * @return true or false
      */
@@ -223,7 +239,75 @@ public class SignManager {
             Console.sendInfo("iniSign", "- " + sign);
         }
         Console.sendInfo("iniSign", "-----------------");
-       
+
+    }
+
+    public class SavedSigns {
+
+        private final List<SavedSign> SavedSignList;
+
+        public SavedSigns() {
+            this.SavedSignList = new ArrayList<>();
+        }
+
+        public SavedSign getSavedSign(Sign sign) {
+            return getSavedSign(sign.getID());
+        }
+
+        public SavedSign getSavedSign(long SignID) {
+            for (SavedSign ss : SavedSignList) {
+                if (ss.getSignID() == SignID) {
+                    return ss;
+                }
+            }
+            return null;
+        }
+
+        public List<SavedSign> getSavedSignList() {
+            return SavedSignList;
+        }
+
+        public boolean isSavedSign(Sign sign) {
+            return isSavedSign(sign.getID());
+        }
+
+        public boolean isSavedSign(long SignUID) {
+            return SavedSignList.stream().anyMatch(ss -> (ss.getSignID() == SignUID));
+        }
+
+        public boolean addSavedSign(Sign sign, Player player) throws SQLException {
+            return addSavedSign(sign.getID(), sign.getText(), player.getUID());
+        }
+
+        public boolean addSavedSign(long SignUID, String SignText, Player player) throws SQLException {
+            return addSavedSign(SignUID, SignText, player.getUID());
+        }
+
+        public boolean addSavedSign(long SignUID, String SignText, String PlayerUID) throws SQLException {
+            if (!isSavedSign(SignUID)) {
+                SavedSign ss = new SavedSign(SignUID, SignText, PlayerUID);
+                plugin.Database.Commands.addCommands(ss);
+                SavedSignList.add(ss);
+            }
+            return false;
+        }
+
+        public boolean removeSavedSign(Sign sign) throws SQLException {
+            return removeSavedSign(sign.getID());
+        }
+
+        public boolean removeSavedSign(long SignUID) throws SQLException {
+            if (isSavedSign(SignUID)) {
+                SavedSign ss = getSavedSign(SignUID);
+                if (ss != null) {
+                    plugin.Database.Commands.removeCommands(ss);
+                    SavedSignList.remove(ss);
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 
 }

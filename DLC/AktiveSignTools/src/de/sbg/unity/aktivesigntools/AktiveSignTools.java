@@ -27,11 +27,14 @@ public class AktiveSignTools extends Plugin {
      * @hidden
      */
     public AktiveSign AS;
+    
+    public astLanguage Language;
 
     @Override
     public void onEnable() {
         this.Console = new asConsole(this);
         Console.sendInfo("Enabled");
+        this.Language = new astLanguage(this);
         this.AS = (AktiveSign) this.getPluginByName("AktiveSign");
         if (AS != null) {
             this.Signs = new astSigns(this, AS, Console);

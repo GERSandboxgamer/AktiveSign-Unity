@@ -9,6 +9,7 @@ import de.sbg.unity.aktivesign.Objects.SignManager;
 import de.sbg.unity.aktivesign.Objects.Tester.Permission;
 import de.sbg.unity.aktivesign.Utils.SignFormat;
 import de.sbg.unity.aktivesign.Utils.TextFormat;
+import de.sbg.unity.aktivesign.gui.GUIs;
 import de.sbg.unity.configmanager.ConfigData;
 import de.sbg.unity.configmanager.ConfigManager;
 import java.io.File;
@@ -36,6 +37,7 @@ public class AktiveSign extends Plugin {
     public asLanguage Language;
     private ToolsAPI ta;
     public Permission SignPermission;
+    public GUIs GUI;
 
     @Override
     public void onEnable() {
@@ -59,6 +61,15 @@ public class AktiveSign extends Plugin {
                 Console.sendInfo("ini", "Load Warps...");
                 this.Warps = new Warps(this);
                 Console.sendInfo("ini", "Load Warps from Database...");
+                
+                Console.sendInfo("ini", "Load SignManager...");
+                this.Sign = new SignManager(this, Console);
+                Console.sendInfo("ini", "Load SignManager...Done!");
+
+                Console.sendInfo("ini", "Ini Signs...");
+                Sign.iniSigns();
+                Console.sendInfo("ini", "Ini Signs...Done!");
+                
                 this.Database = new asDatabase(this, Console);
                 try {
                     Database.iniDatabase();
@@ -71,14 +82,7 @@ public class AktiveSign extends Plugin {
                 Console.sendInfo("ini", "Load Warps...Done!");
 
                 this.Attribute = new asAttribute();
-
-                Console.sendInfo("ini", "Load SignManager...");
-                this.Sign = new SignManager(this, Console);
-                Console.sendInfo("ini", "Load SignManager...Done!");
-
-                Console.sendInfo("ini", "Ini Signs...");
-                Sign.iniSigns();
-                Console.sendInfo("ini", "Ini Signs...Done!");
+                this.GUI = new GUIs(this, Console);
 
                 Console.sendInfo("ini", "Load Languages...");
                 this.Language = new asLanguage();
@@ -130,7 +134,7 @@ public class AktiveSign extends Plugin {
         public int Debug;
         public long Warp_Command_Cost;
         public boolean Warp_Command_OnlyAdmin, UseSign_Weather, UseSign_Time, UseSign_Heal, UseSign_Journal, UseSign_setGroup,
-                UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn, UseSign_Gamemode;
+                UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn, UseSign_Gamemode, SavedSign_OnlyAdmin;
         private final ConfigData Data;
         private final boolean asHome, asTrade, asTools;
 
@@ -173,6 +177,9 @@ public class AktiveSign extends Plugin {
                 Data.addEmptyLine();
                 Data.addCommend("# Only Admins can warp by command");
                 Data.addSetting("Warp_Command_OnlyAdmin", "true");
+                Data.addEmptyLine();
+                Data.addCommend("# Create 'SavedSign' only by admin");
+                Data.addSetting("SavedSign_OnlyAdmin", "true");
                 Data.addEmptyLine();
                 Data.addCommend("# Switch signs on or off");
                 //Data.addSetting("UseSign_AdminHelp", true);
@@ -279,6 +286,7 @@ public class AktiveSign extends Plugin {
             //UseSign_AdminHelp = Boolean.parseBoolean(Data.getSetting("UseSign_AdminHelp"));
             UseSign_Spawn = Boolean.parseBoolean(Data.getSetting("UseSign_Spawn"));
             //UseSign_Gamemode = Boolean.parseBoolean(Data.getSetting("UseSign_Gamemode"));
+            SavedSign_OnlyAdmin = Boolean.parseBoolean(Data.getSetting("SavedSign_OnlyAdmin"));
             UseSign_Gamemode = false;
             UseSign_Journal = false;
             UseSign_ShowMap = false;

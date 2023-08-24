@@ -1,6 +1,7 @@
 package de.sbg.unity.aktivesign.Database;
 
 import de.sbg.unity.aktivesign.AktiveSign;
+import de.sbg.unity.aktivesign.Objects.SavedSign;
 import de.sbg.unity.aktivesign.Objects.Warps.Warp;
 import de.sbg.unity.aktivesign.asConsole;
 import net.risingworld.api.World;
@@ -10,13 +11,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import net.risingworld.api.Timer;
 import net.risingworld.api.utils.Quaternion;
 
-
 public class asDatabase {
-    
+
     private final AktiveSign plugin;
     private final Database Database;
 
@@ -24,11 +25,17 @@ public class asDatabase {
      * Get the table Warps
      */
     public final TabWarps Warps;
+
+    /**
+     * Get the table Commands (Saved Signs)
+     */
+    public final TabCommands Commands;
     private final asConsole Console;
     private Timer SaveTimer;
 
     /**
      * Databse of AktiveSign
+     *
      * @param plugin The AktiveSign plugin
      * @param Console The Console as asConsole
      */
@@ -36,11 +43,14 @@ public class asDatabase {
         this.plugin = plugin;
         this.Database = plugin.getSQLiteConnection(plugin.getPath() + "/database/" + plugin.getDescription("name") + "-" + World.getName() + "-Warps.db");
         this.Warps = new TabWarps(plugin, Console);
+        this.Commands = new TabCommands(Console);
         this.Console = Console;
-        
-        
+
     }
-    
+
+    /**
+     * Start the 'SaveTimer' for the database
+     */
     public void startSaveTimer() {
         SaveTimer = new Timer(180f, 0f, -1, () -> {
             try {
@@ -60,34 +70,35 @@ public class asDatabase {
     public Database getDatabase() {
         return Database;
     }
-    
-    
 
     public Timer getSaveTimer() {
         return SaveTimer;
     }
-    
-    public boolean stopSaveTimer(){
-        if (SaveTimer!= null && SaveTimer.isActive()) {
+
+    public boolean stopSaveTimer() {
+        if (SaveTimer != null && SaveTimer.isActive()) {
             SaveTimer.kill();
             return true;
         }
         return false;
     }
-    
-    public void loadAll() throws SQLException{
+
+    public void loadAll() throws SQLException {
         Warps.loadWarps(plugin.Warps.getWarpList());
+        Commands.loadCommands(plugin.Sign.savedSigns.getSavedSignList());
     }
-    
-    public void saveAll() throws SQLException{
+
+    public void saveAll() throws SQLException {
         Warps.saveAllWarps(plugin.Warps.getWarpList());
+        Commands.saveCommands(plugin.Sign.savedSigns.getSavedSignList());
     }
-    
+
     /**
      * Get the path of the AktiveSign-Database folder!
+     *
      * @return The path as String
      */
-    public String getDatbasePath(){
+    public String getDatbasePath() {
         return plugin.getPath() + "/database/";
     }
 
@@ -104,6 +115,67 @@ public class asDatabase {
                 + "RotZ FLOAT, "
                 + "More TXT "
                 + "); ");
+        Database.execute("CREATE TABLE IF NOT EXISTS Commands ("
+                + "ID INTEGER PRIMARY KEY NOT NULL, " //AUTOINCREMENT
+                + "SignID BIGINT, "
+                + "Command TXT, "
+                + "PlayerID TXT, "
+                + "More TXT "
+                + "); ");
+
+    }
+
+    public class TabCommands {
+
+        private final asConsole Console;
+        private final Connection conn;
+        private PreparedStatement pstmt;
+
+        public TabCommands(asConsole Console) {
+            this.Console = Console;
+            conn = Database.getConnection();
+        }
+
+        public void addCommands(SavedSign ss) throws SQLException {
+            pstmt = conn.prepareStatement("INSERT INTO Commands (SignID, Command, PlayerID) VALUES (?, ?, ?)");
+            pstmt.setLong(1, ss.getSignID());
+            pstmt.setString(2, ss.getText());
+            pstmt.setString(3, ss.getPlayerID());
+            pstmt.executeUpdate();
+            pstmt.close();
+        }
+
+        public void removeCommands(SavedSign ss) throws SQLException {
+            pstmt = conn.prepareStatement("DELETE FROM Commands WHERE SignID=" + ss.getSignID());
+            pstmt.executeUpdate();
+            pstmt.close();
+        }
+
+        public void loadCommands(List<SavedSign> CommandList) throws SQLException {
+            long SignID;
+            String Command, PlayerID;
+            ResultSet result = Database.executeQuery("SELECT * FROM 'Commands'");
+            while (result.next()) {
+                SignID = result.getLong("SignID");
+                Command = result.getString("Command");
+                PlayerID = result.getString("PlayerID");
+                Console.sendInfo("Database-Command", "Load Sign '" + SignID + "'");
+                SavedSign ss = new SavedSign(SignID, Command, PlayerID);
+                CommandList.add(ss);
+            }
+        }
+
+        public void saveCommands(List<SavedSign> CommandList) throws SQLException {
+            for (SavedSign ss : CommandList) {
+                pstmt = conn.prepareStatement("UPDATE Commands SET Command=?, PlayerID=? WHERE SignID='" + ss.getSignID() + "'");
+                pstmt.setString(1, ss.getText());
+                pstmt.setString(1, ss.getPlayerID());
+                pstmt.executeUpdate();
+                pstmt.close();
+                Console.sendInfo("Database-Command", "Save Sign '" + ss.getSignID() + "'");
+            }
+
+        }
 
     }
 
@@ -116,8 +188,10 @@ public class asDatabase {
         private final asConsole Console;
         private final Connection conn;
         private PreparedStatement pstmt;
+
         /**
          * Create new table warps object
+         *
          * @param plugin The AktiveSign plugin
          * @param Console
          */
@@ -142,14 +216,14 @@ public class asDatabase {
                 r2 = result.getFloat("RotX");
                 r3 = result.getFloat("RotY");
                 r4 = result.getFloat("RotZ");
-                
+
                 name = result.getString("Warpname");
                 Console.sendInfo("Database-Warps", "Load Warp '" + name + "'");
-                
+
                 Vector3f pos = new Vector3f(p1, p2, p3);
                 Quaternion rot = new Quaternion(r1, r2, r3, r4);
                 Warp warp = new Warp(id, name, pos, rot);
-                
+
                 WarpList.add(warp);
             }
             Console.sendInfo("Database-Warps", "Done!");
@@ -157,10 +231,11 @@ public class asDatabase {
 
         /**
          * Add a warp to the database
+         *
          * @param Warpname
          * @param pos
          * @param rot
-         * @return 
+         * @return
          * @throws SQLException
          */
         public int addNewWarp(String Warpname, Vector3f pos, Quaternion rot) throws SQLException {
@@ -175,12 +250,12 @@ public class asDatabase {
             pstmt.setFloat(8, rot.z);
             pstmt.executeUpdate();
             pstmt.close();
-            
+
             ResultSet result = Database.executeQuery("SELECT * FROM 'Warps' WHERE Warpname='" + Warpname + "'");
             return result.getInt("ID");
         }
-        
-        public void reloadWarps(List<Warp> WarpList) throws SQLException{
+
+        public void reloadWarps(List<Warp> WarpList) throws SQLException {
             plugin.Warps.getWarpList().clear();
             float p1, p2, p3, r1, r2, r3, r4;
             String name;
@@ -195,7 +270,7 @@ public class asDatabase {
                 r2 = result.getFloat("RotX");
                 r3 = result.getFloat("RotY");
                 r4 = result.getFloat("RotZ");
-                
+
                 name = result.getString("Warpname");
                 Console.sendInfo("Database-Warps", "Load Warp '" + name + "'");
                 Vector3f pos = new Vector3f(p1, p2, p3);
@@ -207,6 +282,7 @@ public class asDatabase {
 
         /**
          * Save all warps to the databse
+         *
          * @param WarpList
          * @throws SQLException
          */
@@ -230,6 +306,7 @@ public class asDatabase {
 
         /**
          * Remove a warp from the database
+         *
          * @param warp The Warp
          * @throws SQLException
          */
@@ -240,7 +317,5 @@ public class asDatabase {
         }
 
     }
-    
-    
-    
+
 }
