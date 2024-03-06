@@ -5,7 +5,6 @@ import de.sbg.unity.aktivesign.Objects.Tester.SignTester;
 import de.sbg.unity.aktivesign.asConsole;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
@@ -23,6 +22,7 @@ public class SignManager {
 
     public final SignTester signTester;
     public final SavedSigns savedSigns;
+    public final SettingsManager Settings;
 
     public SignManager(AktiveSign plugin, asConsole Console) {
         this.plugin = plugin;
@@ -31,6 +31,7 @@ public class SignManager {
         this.savedSigns = new SavedSigns();
         this.SignList = new ArrayList<>();
         this.UserSign = new ArrayList<>();
+        this.Settings = new SettingsManager();
     }
 
     /**

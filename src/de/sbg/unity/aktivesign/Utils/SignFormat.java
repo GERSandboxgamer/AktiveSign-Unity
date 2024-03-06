@@ -30,6 +30,38 @@ public class SignFormat {
         return text;
     }
     
+    public String setNewMax(String signText, String line2Text) throws IndexOutOfBoundsException, NumberFormatException {
+        return setNewMax(signText, line2Text,2, " ");
+    }
+    
+    public String setNewMax(String signText, String lineText, int maxPos) throws IndexOutOfBoundsException, NumberFormatException {
+        return setNewMax(signText, lineText, maxPos, " ");
+    }
+    
+    public String setNewMax(String signText, String lineText, int maxPos, String spliter) throws IndexOutOfBoundsException, NumberFormatException{
+        String newString = null;
+        int zahl;
+        String[] split = lineText.split(spliter);
+        if (split.length >= 2) {
+            zahl = Integer.parseInt(split[maxPos]);
+            int zahl2 = zahl -1;
+            newString = signText.replace(lineText, split[0] + " " + zahl2);
+        }
+        return newString;
+    }
+    
+    public int getMax(String line2Text) throws IndexOutOfBoundsException, NumberFormatException{
+        return getMax(line2Text, 2, " ");
+    }
+    
+    public int getMax(String lineText, int posMax, String spliter) throws IndexOutOfBoundsException, NumberFormatException {
+        String[] split = lineText.split(spliter);
+        if (split.length >= 2) {
+            return Integer.parseInt(split[posMax]);
+        }
+        return -1;
+    }
+    
     public String replaceText(int line, String newText, String SignText) {
         String text = null;
         String[] lines = Utils.StringUtils.getLines(SignText);

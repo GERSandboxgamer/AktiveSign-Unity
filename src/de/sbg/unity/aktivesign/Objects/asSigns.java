@@ -22,7 +22,7 @@ public class asSigns {
     }
 
     public String getLine(int l) {
-        String[] lines = Utils.StringUtils.getLines(SignText);
+        String[] lines = (String[])SignText.lines().toArray();
         if (lines.length >= l) {
             return lines[l - 1];
         }

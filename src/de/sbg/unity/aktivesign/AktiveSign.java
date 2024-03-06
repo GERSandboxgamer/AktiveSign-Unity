@@ -102,7 +102,7 @@ public class AktiveSign extends Plugin {
 
         Console.sendInfo("Check for Updates...");
         try {
-            update = new Update(this, "http://gs.sandboxgamer.de/downloads/Plugins/risingworld/unity/AktiveSign/version.txt");
+            update = new Update(this, "https://www.sandboxgamer.de/Downloads/Plugins/risingworld/unity/AktiveSign/version.txt");
         } catch (IOException | URISyntaxException ioex) {
             Console.sendErr("Load", ioex.getMessage());
         }
@@ -122,6 +122,7 @@ public class AktiveSign extends Plugin {
             Database.saveAll();
             Database.getDatabase().close();
         } catch (SQLException ex) {
+            Console.sendErr("SQL", ex.getMessage());
         }
         Console.sendInfo("Desabled");
     }
@@ -135,6 +136,7 @@ public class AktiveSign extends Plugin {
         public long Warp_Command_Cost;
         public boolean Warp_Command_OnlyAdmin, UseSign_Weather, UseSign_Time, UseSign_Heal, UseSign_Journal, UseSign_setGroup,
                 UseSign_Warp, UseSign_Teleport, UseSign_ShowMap, UseSign_AdminHelp, UseSign_Spawn, UseSign_Gamemode, SavedSign_OnlyAdmin;
+        public boolean UseSign_Buy, UseSign_Sell;
         private final ConfigData Data;
         private final boolean asHome, asTrade, asTools;
 
@@ -202,11 +204,11 @@ public class AktiveSign extends Plugin {
                     Data.addCommend("#--------------------------------#");
                     Data.addEmptyLine();
                     Data.addCommend("# Switch signs on or off");
-                    //Data.addSetting("UseSign_Buy", true);
+                    Data.addSetting("UseSign_Buy", true);
                     //Data.addSetting("UseSign_BuyAll", true);
                     //Data.addSetting("UseSign_MoreHealth", true);
-                    //Data.addSetting("UseSign_MoreSlots", true);
-                    //Data.addSetting("UseSign_Sell", true);
+                    //Data.addSetting("UseSign_MoreChestSlots", true);
+                    Data.addSetting("UseSign_Sell", true);
                     //Data.addSetting("UseSign_SellAll", true);
                     //Data.addSetting("UseSign_Shop", true);
                     //Data.addSetting("UseSign_UserShop", true);
@@ -292,6 +294,8 @@ public class AktiveSign extends Plugin {
             UseSign_ShowMap = false;
             UseSign_AdminHelp = false;
             
+            UseSign_Buy = Boolean.parseBoolean(Data.getSetting("UseSign_Buy"));
+            UseSign_Sell = Boolean.parseBoolean(Data.getSetting("UseSign_Sell"));
         }
 
     }
