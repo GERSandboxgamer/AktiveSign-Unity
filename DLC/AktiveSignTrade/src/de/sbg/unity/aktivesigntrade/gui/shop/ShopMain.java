@@ -7,6 +7,7 @@ import de.sbg.unity.iconomy.iConomy;
 import net.risingworld.api.events.Listener;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.ui.UIElement;
+import net.risingworld.api.ui.UILabel;
 import net.risingworld.api.ui.style.Pivot;
 
 
@@ -53,6 +54,8 @@ public class ShopMain {
     }
     
     private void TitelBar() {
+        UIElement titelBox = new UIElement();
+        UILabel titel = new UILabel("Shop");
         
     }
     
@@ -60,8 +63,14 @@ public class ShopMain {
     
     }
     
+    public boolean isEditMode() {
+        return editMode;
+    }
+    
     public class ShopMainListener implements Listener {
         
     }
+
+    
     
 }

@@ -25,5 +25,17 @@ public class DatabaseFormat {
         ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(b));
         return is.readObject();
     }
+    
+    public int booleanToInt(boolean b) {
+        if (b) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public boolean intToBoolean(int i) {
+        return i == 1;
+    }
+    
 
 }

@@ -8,8 +8,12 @@ import de.sbg.unity.aktivesign.Utils.PlayerUtils;
 import de.sbg.unity.aktivesigntrade.AktiveSignTrade;
 import de.sbg.unity.aktivesigntrade.asConsole;
 import de.sbg.unity.iconomy.iConomy;
+import net.risingworld.api.World;
+import net.risingworld.api.definitions.Objects;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
+import net.risingworld.api.events.player.world.PlayerDestroyObjectEvent;
+import net.risingworld.api.events.player.world.PlayerPlaceObjectEvent;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
 
@@ -30,6 +34,8 @@ public class SignListener implements Listener {
     private boolean hasMax(String lineText) {
         return lineText.split(" ").length == 3;
     }
+    
+    
 
     @EventMethod
     public void onTestSignEvent(TestSignEvent event) {

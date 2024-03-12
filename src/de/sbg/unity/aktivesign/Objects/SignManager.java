@@ -31,7 +31,7 @@ public class SignManager {
         this.savedSigns = new SavedSigns();
         this.SignList = new ArrayList<>();
         this.UserSign = new ArrayList<>();
-        this.Settings = new SettingsManager();
+        this.Settings = new SettingsManager(plugin, Console);
     }
 
     /**

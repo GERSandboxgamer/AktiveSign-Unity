@@ -20,6 +20,7 @@ import net.risingworld.api.Plugin;
 
 /**
  * Main-Class AktiveSign
+ *
  * @author Sandboxgamer
  */
 public class AktiveSign extends Plugin {
@@ -47,13 +48,16 @@ public class AktiveSign extends Plugin {
         this.TextFormat = new TextFormat();
         Console.sendInfo("ini", "Load Config...");
         configManager = (ConfigManager) getPluginByName("ConfigManager");
-        ta = (ToolsAPI)getPluginByName("ToolsAPI");
+        ta = (ToolsAPI) getPluginByName("ToolsAPI");
         if (configManager != null && ta != null) {
             this.SignPermission = new Permission(this, Console);
             try {
                 Config = new Config(this);
             } catch (IOException ex) {
-
+                Console.sendErr("Config-IOException", "MSG: " + ex.getMessage());
+                for (StackTraceElement ste : ex.getStackTrace()) {
+                    Console.sendErr("Config-IOException", ste.toString());
+                }
             }
             if (Config.iniConifg()) {
                 Console.sendInfo("ini", "Load Config...Done!");
@@ -61,7 +65,7 @@ public class AktiveSign extends Plugin {
                 Console.sendInfo("ini", "Load Warps...");
                 this.Warps = new Warps(this);
                 Console.sendInfo("ini", "Load Warps from Database...");
-                
+
                 Console.sendInfo("ini", "Load SignManager...");
                 this.Sign = new SignManager(this, Console);
                 Console.sendInfo("ini", "Load SignManager...Done!");
@@ -69,14 +73,28 @@ public class AktiveSign extends Plugin {
                 Console.sendInfo("ini", "Ini Signs...");
                 Sign.iniSigns();
                 Console.sendInfo("ini", "Ini Signs...Done!");
-                
+
                 this.Database = new asDatabase(this, Console);
                 try {
                     Database.iniDatabase();
                     Database.loadAll();
                     Database.startSaveTimer();
                 } catch (SQLException ex) {
-
+                    Console.sendErr("DB-loadAll-SQLException", "MSG: " + ex.getMessage());
+                    Console.sendErr("DB-loadAll-SQLException", "SQL: " + ex.getSQLState());
+                    for (StackTraceElement ste : ex.getStackTrace()) {
+                        Console.sendErr("DB-loadAll-SQLException", ste.toString());
+                    }
+                } catch (IOException ex) {
+                    Console.sendErr("DB-loadAll-IOException", "MSG: " + ex.getMessage());
+                    for (StackTraceElement ste : ex.getStackTrace()) {
+                        Console.sendErr("DB-loadAll-IOException", ste.toString());
+                    }
+                } catch (ClassNotFoundException ex) {
+                    Console.sendErr("DB-loadAll-ClassNotFoundException", "MSG: " + ex.getMessage());
+                    for (StackTraceElement ste : ex.getStackTrace()) {
+                        Console.sendErr("DB-loadAll-ClassNotFoundException", ste.toString());
+                    }
                 }
                 Console.sendInfo("ini", "Load Warps from Database...Done!");
                 Console.sendInfo("ini", "Load Warps...Done!");
@@ -91,11 +109,11 @@ public class AktiveSign extends Plugin {
                     Console.sendInfo("ini", "Erstelle: " + fileCongigPhat.getAbsolutePath());
                 }
                 ClassPluginJSONManager jm = new ClassPluginJSONManager();
-                
+
                 jm.getBanList().add("defaultLanguage");
-                String configFile = getPath()+System.getProperty("file.separator")+"Languages"+System.getProperty("file.separator")+"Language.json";
+                String configFile = getPath() + System.getProperty("file.separator") + "Languages" + System.getProperty("file.separator") + "Language.json";
                 Console.sendInfo("ini", "Load Languages...Done!");
-                Language = (asLanguage)jm.update(Language, configFile);
+                Language = (asLanguage) jm.update(Language, configFile);
                 Console.sendInfo("ini", "Load Languages...Done!");
             }
         }
@@ -123,6 +141,11 @@ public class AktiveSign extends Plugin {
             Database.getDatabase().close();
         } catch (SQLException ex) {
             Console.sendErr("SQL", ex.getMessage());
+        } catch (IOException ex) {
+            Console.sendErr("DB-saveAll-IOException", "MSG: " + ex.getMessage());
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                Console.sendErr("DB-saveAll-IOException", ste.toString());
+            }
         }
         Console.sendInfo("Desabled");
     }
@@ -149,6 +172,7 @@ public class AktiveSign extends Plugin {
 
         /**
          * Get a setting form the config.
+         *
          * @param key
          * @return The setting as String
          */
@@ -158,6 +182,7 @@ public class AktiveSign extends Plugin {
 
         /**
          * Set a setting in the config
+         *
          * @param key The key as String
          * @param value The value as Object
          */
@@ -195,7 +220,6 @@ public class AktiveSign extends Plugin {
                 Data.addSetting("UseSign_Time", true);
                 Data.addSetting("UseSign_Warp", true);
                 Data.addSetting("UseSign_Weather", true);
-               
 
                 if (asTrade) {
                     Data.addEmptyLine();
@@ -293,7 +317,7 @@ public class AktiveSign extends Plugin {
             UseSign_Journal = false;
             UseSign_ShowMap = false;
             UseSign_AdminHelp = false;
-            
+
             UseSign_Buy = Boolean.parseBoolean(Data.getSetting("UseSign_Buy"));
             UseSign_Sell = Boolean.parseBoolean(Data.getSetting("UseSign_Sell"));
         }

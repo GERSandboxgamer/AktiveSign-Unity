@@ -2,6 +2,7 @@ package de.sbg.unity.aktivesigntrade;
 
 import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.AktiveSign.Config;
+import de.sbg.unity.aktivesigntrade.listener.PlayerListener;
 import de.sbg.unity.iconomy.iConomy;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -38,6 +39,8 @@ public class AktiveSignTrade extends Plugin {
             } catch (IOException | URISyntaxException ioex) {
                 Console.sendErr("Load", ioex.getMessage());
             }
+            
+            registerEventListener(new PlayerListener(eco, this, Console));
         }
 
     }

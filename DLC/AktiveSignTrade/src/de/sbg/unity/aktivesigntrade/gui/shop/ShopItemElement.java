@@ -18,7 +18,7 @@ public class ShopItemElement extends UIElement {
         this.lang = player.getLanguage();
         this.setPosition(50, 50, true);
         this.setPivot(Pivot.MiddleCenter);
-        this.setSize(1100, 700, false);
+        this.setSize(400, 100, false);
         this.setBackgroundColor(ColorRGBA.Blue.r,ColorRGBA.Blue.g, ColorRGBA.Blue.b, 1);
         this.setBorder(3);
         this.setBorderColor(ColorRGBA.White.toIntRGBA());
@@ -26,18 +26,18 @@ public class ShopItemElement extends UIElement {
         
         UILabel itemName = new UILabel(item.getAmount() + "x " + item.getName());
         itemName.setPivot(Pivot.UpperCenter);
-        itemName.setFontSize(25);
-        itemName.setPosition(2, 50, true);
+        itemName.setFontSize(35);
+        itemName.setPosition(50, 2, true);
         
         UILabel price = new UILabel(eco.moneyFormat.getMoneyAsFormatedString(player, item.getPrice()));
         price.setPivot(Pivot.LowerRight);
-        price.setFontSize(25);
-        price.setPosition(2, 25, true);
+        price.setFontSize(35);
+        price.setPosition(98, 98, true);
         
         UILabel max = new UILabel("Max: " + item.getMax());
         max.setPivot(Pivot.LowerLeft);
-        max.setPosition(2, 25, true);
-        max.setFontSize(25);
+        max.setPosition(2, 98, true);
+        max.setFontSize(35);
         
         this.addChild(itemName);
         this.addChild(price);

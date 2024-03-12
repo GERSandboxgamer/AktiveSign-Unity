@@ -7,6 +7,7 @@ import de.sbg.unity.aktivesigntrade.asConsole;
 import de.sbg.unity.aktivesigntrade.gui.shop.ShopMain;
 import de.sbg.unity.iconomy.iConomy;
 import net.risingworld.api.objects.Player;
+import net.risingworld.api.ui.UIElement;
 
 public class GuiManager {
 
@@ -27,21 +28,21 @@ public class GuiManager {
     public class Shop {
 
         public class Main {
-            
+
             private String MainGuiAttribute;
-            
-            public Main(){
+
+            public Main() {
                 MainGuiAttribute = StartAtt + "Shop-Main";
             }
-            
+
             public ShopMain showUserShop(Player player, ShopType type) {
                 return showGUI(player, type, false, true);
             }
-            
+
             public ShopMain showGUI(Player player, ShopType type) {
                 return showGUI(player, type, false, false);
             }
-            
+
             public ShopMain showGUI(Player player, ShopType type, boolean editMode) {
                 return showGUI(player, type, editMode, false);
             }
@@ -50,18 +51,24 @@ public class GuiManager {
                 if (!player.hasAttribute(MainGuiAttribute)) {
                     player.setMouseCursorVisible(true);
                 } else {
-                    
+
                 }
                 return getGUI(player);
             }
 
             public boolean hideGUI(Player player) {
-                player.setMouseCursorVisible(false);
-            }
-            
-            public ShopMain getGUI(Player player){
                 if (player.hasAttribute(MainGuiAttribute)) {
-                    return (ShopMain)player.getAttribute(MainGuiAttribute);
+                    player.setMouseCursorVisible(false);
+                    player.removeUIElement((UIElement)player.getAttribute(MainGuiAttribute));
+                    return true;
+                }
+                return false;
+
+            }
+
+            public ShopMain getGUI(Player player) {
+                if (player.hasAttribute(MainGuiAttribute)) {
+                    return (ShopMain) player.getAttribute(MainGuiAttribute);
                 }
                 return null;
             }

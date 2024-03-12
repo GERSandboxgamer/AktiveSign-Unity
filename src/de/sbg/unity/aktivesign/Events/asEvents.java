@@ -7,6 +7,7 @@ import de.sbg.unity.aktivesign.Utils.SignFormat;
 import de.sbg.unity.aktivesign.Utils.TextFormat;
 import de.sbg.unity.aktivesign.asConsole;
 import de.sbg.unity.aktivesign.gui.AttributeGUI;
+import java.io.IOException;
 import java.sql.SQLException;
 import net.risingworld.api.Server;
 import net.risingworld.api.World;
@@ -20,6 +21,7 @@ import net.risingworld.api.events.player.PlayerObjectInteractionEvent;
 import net.risingworld.api.events.player.PlayerSetSignTextEvent;
 import net.risingworld.api.events.player.ui.PlayerUIElementClickEvent;
 import net.risingworld.api.events.player.world.PlayerDestroyObjectEvent;
+import net.risingworld.api.events.player.world.PlayerPlaceObjectEvent;
 import net.risingworld.api.events.player.world.PlayerRemoveObjectEvent;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.objects.Sign;
@@ -458,38 +460,118 @@ public class asEvents implements Listener {
     public void onPlayerDestroyObjectEvent(PlayerDestroyObjectEvent event) {
         Player player = event.getPlayer();
         String lang = player.getLanguage();
+        boolean destroy = true;
         ObjectDefinition def = event.getObjectDefinition();
         if (def.type == Objects.Type.Sign) {
             Sign sign = World.getSign(event.getGlobalID());
             if (!plugin.Sign.savedSigns.isSavedSign(sign)) {
                 if (plugin.Sign.isAktiveSign(sign)) {
                     if (!plugin.Sign.isUserSign(sign)) {
-                        if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
+                        if (!plugin.Attribute.Player.Sign.getDestroyMode(player) || !player.isAdmin()) {
                             event.setCancelled(true);
+                            destroy = false;
                             player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
                         }
                     } else {
-                        //TODO UserSign
+                        try {
+                            if (!player.isAdmin() || !plugin.Sign.Settings.getSettings(sign).isOwner(player)) {
+                                destroy = false;
+                                player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                            }
+                        } catch (SQLException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                            }
+                        } catch (IOException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                            }
+                        }
                     }
                 }
             } else {
                 String savedText = plugin.Sign.savedSigns.getSavedSign(sign).getText();
                 String[] lines = Utils.StringUtils.getLines(savedText);
-                if (!savedText.isBlank() && !savedText.isEmpty() && lines.length >= 1) {
+                if (!savedText.isBlank() || !savedText.isEmpty() || lines.length >= 1) {
                     if (plugin.Sign.isAktiveSign(lines[0])) {
                         if (!plugin.Sign.isUserSign(sign)) {
-                            if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
+                            if (!plugin.Attribute.Player.Sign.getDestroyMode(player) || player.isAdmin()) {
                                 event.setCancelled(true);
                                 player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                            } else {
+                                destroy = removeSavedSign(player, sign);
+                                event.setCancelled(!destroy);
                             }
                         } else {
-                            //TODO UserSign
+                            try {
+                                if (!player.isAdmin() || !plugin.Sign.Settings.getSettings(sign).isOwner(player)) {
+                                    destroy = false;
+                                    player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                                }
+                            } catch (SQLException ex) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                                for (StackTraceElement ste : ex.getStackTrace()) {
+                                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                                }
+                            } catch (IOException ex) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                                for (StackTraceElement ste : ex.getStackTrace()) {
+                                    Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                                }
+                            }
                         }
                     } else {
-                        event.setCancelled(!removeSavedSign(player, sign));
+                        try {
+                            if (plugin.Sign.Settings.getSettings(sign).isOwner(player) || player.isAdmin()) {
+                                destroy = removeSavedSign(player, sign);
+                                event.setCancelled(!destroy);
+                            }
+                        } catch (SQLException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                            }
+                        } catch (IOException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                            }
+                        }
                     }
                 } else {
-                    event.setCancelled(!removeSavedSign(player, sign));
+                    try {
+                        if (plugin.Sign.Settings.getSettings(sign).isOwner(player) || player.isAdmin()) {
+                            destroy = removeSavedSign(player, sign);
+                            event.setCancelled(!destroy);
+                        }
+                    } catch (SQLException ex) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                        for (StackTraceElement ste : ex.getStackTrace()) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                        }
+                    } catch (IOException ex) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                        for (StackTraceElement ste : ex.getStackTrace()) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                        }
+                    }
+                }
+            }
+            if (destroy) {
+                try {
+                    plugin.Sign.Settings.removeSign(sign.getID());
+                } catch (SQLException ex) {
+                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                    for (StackTraceElement ste : ex.getStackTrace()) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                    }
                 }
             }
         }
@@ -519,25 +601,147 @@ public class asEvents implements Listener {
     public void onPlayerRemoveObjectEvent(PlayerRemoveObjectEvent event) {
         Player player = event.getPlayer();
         String lang = player.getLanguage();
+        boolean destroy = true;
         ObjectDefinition def = event.getObjectDefinition();
         if (def.type == Objects.Type.Sign) {
             Sign sign = World.getSign(event.getGlobalID());
             if (!plugin.Sign.savedSigns.isSavedSign(sign)) {
                 if (plugin.Sign.isAktiveSign(sign)) {
                     if (!plugin.Sign.isUserSign(sign)) {
-                        if (!plugin.Attribute.Player.Sign.getDestroyMode(player)) {
+                        if (!plugin.Attribute.Player.Sign.getDestroyMode(player) || !player.isAdmin()) {
                             event.setCancelled(true);
+                            destroy = false;
                             player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                        }
+                    } else {
+                        try {
+                            if (!player.isAdmin() || !plugin.Sign.Settings.getSettings(sign).isOwner(player)) {
+                                destroy = false;
+                                player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                            }
+                        } catch (SQLException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                            }
+                        } catch (IOException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                            }
                         }
                     }
                 }
             } else {
                 String savedText = plugin.Sign.savedSigns.getSavedSign(sign).getText();
                 String[] lines = Utils.StringUtils.getLines(savedText);
-                if (!savedText.isBlank() && !savedText.isEmpty() && lines.length >= 1) {
-                    //TODO onPlayerRemoveObjectEvent
+                if (!savedText.isBlank() || !savedText.isEmpty() || lines.length >= 1) {
+                    if (plugin.Sign.isAktiveSign(lines[0])) {
+                        if (!plugin.Sign.isUserSign(sign)) {
+                            if (!plugin.Attribute.Player.Sign.getDestroyMode(player) || player.isAdmin()) {
+                                event.setCancelled(true);
+                                player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                            } else {
+                                destroy = removeSavedSign(player, sign);
+                                event.setCancelled(!destroy);
+                            }
+                        } else {
+                            try {
+                                if (!player.isAdmin() || !plugin.Sign.Settings.getSettings(sign).isOwner(player)) {
+                                    destroy = false;
+                                    player.sendTextMessage(textFormat.Color("red", plugin.Language.getSign().getSign_Distroy_Fail(lang)));
+                                }
+                            } catch (SQLException ex) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                                for (StackTraceElement ste : ex.getStackTrace()) {
+                                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                                }
+                            } catch (IOException ex) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                                for (StackTraceElement ste : ex.getStackTrace()) {
+                                    Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                                }
+                            }
+                        }
+                    } else {
+                        try {
+                            if (plugin.Sign.Settings.getSettings(sign).isOwner(player) || player.isAdmin()) {
+                                destroy = removeSavedSign(player, sign);
+                                event.setCancelled(!destroy);
+                            }
+                        } catch (SQLException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                            }
+                        } catch (IOException ex) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                            for (StackTraceElement ste : ex.getStackTrace()) {
+                                Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                            }
+                        }
+                    }
+                } else {
+                    try {
+                        if (plugin.Sign.Settings.getSettings(sign).isOwner(player) || player.isAdmin()) {
+                            destroy = removeSavedSign(player, sign);
+                            event.setCancelled(!destroy);
+                        }
+                    } catch (SQLException ex) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                        for (StackTraceElement ste : ex.getStackTrace()) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                        }
+                    } catch (IOException ex) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", "MSG: " + ex.getMessage());
+                        for (StackTraceElement ste : ex.getStackTrace()) {
+                            Console.sendErr("DB-onPlayerDestroyObjectEvent-IOException", ste.toString());
+                        }
+                    }
                 }
             }
+            if (destroy) {
+                try {
+                    plugin.Sign.Settings.removeSign(sign.getID());
+                } catch (SQLException ex) {
+                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "MSG: " + ex.getMessage());
+                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", "SQL: " + ex.getSQLState());
+                    for (StackTraceElement ste : ex.getStackTrace()) {
+                        Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    @EventMethod
+    public void onPlayerPlaceSignEvent(PlayerPlaceObjectEvent event) {
+        Player player = event.getPlayer();
+        String lang = player.getLanguage();
+        ObjectDefinition def = event.getObjectDefinition();
+        if (def.type == Objects.Type.Sign) {
+            Sign sign = World.getSign(event.getGlobalID());
+            try {
+                if (!plugin.Sign.Settings.hasSetting(sign.getID())) {
+                    plugin.Sign.Settings.addSign(sign);
+                }
+            } catch (SQLException ex) {
+                Console.sendErr("DB-onPlayerPlaceSignEvent-SQLException", "MSG: " + ex.getMessage());
+                Console.sendErr("DB-onPlayerPlaceSignEvent-SQLException", "SQL: " + ex.getSQLState());
+                for (StackTraceElement ste : ex.getStackTrace()) {
+                    Console.sendErr("DB-onPlayerDestroyObjectEvent-SQLException", ste.toString());
+                }
+            } catch (IOException ex) {
+                Console.sendErr("DB-onPlayerPlaceSignEvent-IOException", "MSG: " + ex.getMessage());
+                for (StackTraceElement ste : ex.getStackTrace()) {
+                    Console.sendErr("DB-onPlayerPlaceSignEvent-IOException", ste.toString());
+                }
+            }
+            
         }
     }
 }

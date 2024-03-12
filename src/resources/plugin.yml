@@ -1,6 +1,6 @@
 name: AktiveSign
 main: de.sbg.unity.aktivesign.AktiveSign
-version: 2.0.3
+version: 2.0.4
 author: Sandboxgamer
 description: "Run Commands on signs"
 loadorder: -10

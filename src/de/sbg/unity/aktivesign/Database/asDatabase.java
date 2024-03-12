@@ -3,7 +3,11 @@ package de.sbg.unity.aktivesign.Database;
 import de.sbg.unity.aktivesign.AktiveSign;
 import de.sbg.unity.aktivesign.Objects.SavedSign;
 import de.sbg.unity.aktivesign.Objects.Warps.Warp;
+import de.sbg.unity.aktivesign.Utils.DatabaseFormat;
+import de.sbg.unity.aktivesign.Utils.ShopItem;
+import de.sbg.unity.aktivesign.Utils.SignSettings;
 import de.sbg.unity.aktivesign.asConsole;
+import java.io.IOException;
 import net.risingworld.api.World;
 import net.risingworld.api.database.Database;
 import net.risingworld.api.utils.Vector3f;
@@ -20,6 +24,7 @@ public class asDatabase {
 
     private final AktiveSign plugin;
     private final Database Database;
+    private final DatabaseFormat format;
 
     /**
      * Get the table Warps
@@ -30,6 +35,7 @@ public class asDatabase {
      * Get the table Commands (Saved Signs)
      */
     public final TabCommands Commands;
+    public final TabSignSettings SignSettings;
     private final asConsole Console;
     private Timer SaveTimer;
 
@@ -42,10 +48,11 @@ public class asDatabase {
     public asDatabase(AktiveSign plugin, asConsole Console) {
         this.plugin = plugin;
         this.Database = plugin.getSQLiteConnection(plugin.getPath() + "/database/" + plugin.getDescription("name") + "-" + World.getName() + "-Warps.db");
+        this.format = new DatabaseFormat();
         this.Warps = new TabWarps(plugin, Console);
         this.Commands = new TabCommands(Console);
         this.Console = Console;
-
+        this.SignSettings = new TabSignSettings(Console);
     }
 
     /**
@@ -61,6 +68,12 @@ public class asDatabase {
                 Console.sendErr("DB-saveAll-SQLException", "SQL: " + ex.getSQLState());
                 for (StackTraceElement ste : ex.getStackTrace()) {
                     Console.sendErr("DB-saveAll-SQLException", ste.toString());
+                }
+            } catch (IOException ex) {
+                stopSaveTimer();
+                Console.sendErr("DB-saveAll-IOException", "MSG: " + ex.getMessage());
+                for (StackTraceElement ste : ex.getStackTrace()) {
+                    Console.sendErr("DB-saveAll-IOException", ste.toString());
                 }
             }
         });
@@ -83,14 +96,16 @@ public class asDatabase {
         return false;
     }
 
-    public void loadAll() throws SQLException {
+    public void loadAll() throws SQLException, IOException, ClassNotFoundException {
         Warps.loadWarps(plugin.Warps.getWarpList());
         Commands.loadCommands(plugin.Sign.savedSigns.getSavedSignList());
+        SignSettings.loadAll(plugin.Sign.Settings.getSignSettingsList());
     }
 
-    public void saveAll() throws SQLException {
+    public void saveAll() throws SQLException, IOException {
         Warps.saveAllWarps(plugin.Warps.getWarpList());
         Commands.saveCommands(plugin.Sign.savedSigns.getSavedSignList());
+        SignSettings.saveAll(plugin.Sign.Settings.getSignSettingsList());
     }
 
     /**
@@ -122,7 +137,99 @@ public class asDatabase {
                 + "PlayerID TXT, "
                 + "More TXT "
                 + "); ");
+        Database.execute("CREATE TABLE IF NOT EXISTS SignSettings ("
+                + "ID INTEGER PRIMARY KEY NOT NULL, "
+                + "SignID BIGINT, "
+                + "OwnerID TXT, "
+                + "PlayerInteractionList BLOB, "
+                + "Shop INTEGER, "
+                + "ShopName TXT, "
+                + "ShopItems BLOB, "
+                + "OnePerPlayer INTEGER, "
+                + "LastInteraction TXT, "
+                + "More BLOB "
+                + "); ");
 
+    }
+
+    public class TabSignSettings {
+
+        private final asConsole Console;
+        private final Connection conn;
+        private PreparedStatement pstmt;
+
+        public TabSignSettings(asConsole Console) {
+            this.Console = Console;
+            conn = Database.getConnection();
+        }
+
+        public void add(long signID, SignSettings setting) throws SQLException, IOException {
+            pstmt = conn.prepareStatement("INSERT INTO SignSettings (SignID, OwnerID, PlayerInteractionList, Shop, ShopName, ShopItems, OnePerPlayer, LastInteraction) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            pstmt.setLong(1, signID);
+            pstmt.setString(2, setting.getOwnerID());
+            pstmt.setBytes(3, format.toBlob(setting.getPlayerInteractionList()));
+            pstmt.setInt(4, format.booleanToInt(setting.isShop()));
+            pstmt.setString(5, setting.getShopName());
+            pstmt.setBytes(6, format.toBlob(setting.getShopItems()));
+            pstmt.setInt(7, format.booleanToInt(setting.isOnePerPlayer()));
+            pstmt.setString(8, setting.getLastInteractedPlayer());
+            pstmt.executeUpdate();
+            pstmt.close();
+        }
+
+        public void remove(long signID) throws SQLException {
+            pstmt = conn.prepareStatement("DELETE FROM SignSettings WHERE SignID=" + signID);
+            pstmt.executeUpdate();
+            pstmt.close();
+        }
+
+        public void loadAll(HashMap<Long, SignSettings> Settings) throws SQLException, IOException, ClassNotFoundException {
+            long signID;
+            String OwnerID, ShopName, lastInteractPlayer;
+            List<String> PlayerInteractionList;
+            List<ShopItem> ShopItems;
+            boolean onePerPlayer, Shop;
+
+            ResultSet result = Database.executeQuery("SELECT * FROM 'SignSettings'");
+            while (result.next()) {
+                signID = result.getLong("SignID");
+                OwnerID = result.getString("OwnerID");
+                PlayerInteractionList = (List<String>) format.toObject(result.getBytes("PlayerInteractionList"));
+                ShopItems = (List<ShopItem>) format.toObject(result.getBytes("ShopItems"));
+                onePerPlayer = format.intToBoolean(result.getInt("OnePerPlayer"));
+                Shop = format.intToBoolean(result.getInt("Shop"));
+                ShopName = result.getString("ShopName");
+                lastInteractPlayer = result.getString("LastInteraction");
+
+                SignSettings ss = new SignSettings(signID);
+                ss.addAllPlayerInteraction(PlayerInteractionList);
+                ss.addAllShopItems(ShopItems);
+                ss.setOwnerID(OwnerID);
+                ss.setOnePerPlayer(onePerPlayer);
+                ss.setShop(Shop);
+                ss.setShopName(ShopName);
+                ss.setLastInteractedPlayer(lastInteractPlayer);
+                Settings.put(signID, ss);
+                Console.sendInfo("Database-SignSettings", "Load SignSettings '" + signID + "'");
+            }
+
+        }
+
+        public void saveAll(HashMap<Long, SignSettings> Settings) throws SQLException, IOException {
+            for (SignSettings ss : Settings.values()) {
+                pstmt = conn.prepareStatement("UPDATE SignSettings SET OwnerID=?, PlayerInteractionList=?, Shop=?, ShopName=?, ShopItems=?, OnePerPlayer=?, LastInteraction=? WHERE SignID='" + ss.getSignID() + "'");
+                pstmt.setString(1, ss.getOwnerID());
+                pstmt.setBytes(2, format.toBlob(ss.getPlayerInteractionList()));
+                pstmt.setInt(3, format.booleanToInt(ss.isShop()));
+                pstmt.setString(4, ss.getShopName());
+                pstmt.setBytes(5, format.toBlob(ss.getShopItems()));
+                pstmt.setInt(6, format.booleanToInt(ss.isOnePerPlayer()));
+                pstmt.setString(7, ss.getLastInteractedPlayer());
+                pstmt.executeUpdate();
+                pstmt.close();
+                Console.sendInfo("Database-Command", "Save SignSettings '" + ss.getSignID() + "'");
+            }
+        }
     }
 
     public class TabCommands {

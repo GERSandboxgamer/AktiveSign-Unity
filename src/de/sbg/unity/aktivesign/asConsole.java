@@ -58,7 +58,7 @@ public class asConsole {
      * @param msg
      */
     public void sendWarning(Object msg) {
-        Internals.println("[" + plugin.getDescription("name") + "-Warning] " + msg, 6);
+        Internals.println("[" + plugin.getDescription("name") + "-Warning] " + msg, 14);
     }
 
     /**
@@ -67,7 +67,7 @@ public class asConsole {
      * @param msg
      */
     public void sendWarning(String ClassName, Object msg) {
-        Internals.println("[" + plugin.getDescription("name") + "-Warning] [" + ClassName + "] " + msg, 6);
+        Internals.println("[" + plugin.getDescription("name") + "-Warning] [" + ClassName + "] " + msg, 14);
     }
     
     /**
